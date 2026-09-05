@@ -1,0 +1,94 @@
+\documentclass[12pt]{ai_conquer2026}
+\addbibresource{references.bib}
+\graphicspath{{figures/}{../figures/}{./}{sections/figures/}{../report/figures/}}
+
+\title{%
+  \begin{center}
+        \Large {AI VIET NAM -- AI Conquer 2026 (Hướng Du học / Research Track)}\\[.5ex]  
+        \Huge \textbf{Context-Aware Dual-Regime Stacking Forecaster với Kỹ nghệ Đặc trưng Định hướng Vật lý cho Dự báo Phụ tải Điện Giờ PG\&E}\\[.5ex]
+  \end{center}
+}
+
+% Author --------------------------------------------------------------------
+\posttitle{
+\author{
+\begin{minipage}{\textwidth}
+\centering
+{
+\vspace{-1.5em}
+\textbf{Debug Team} \\
+Nguyễn Thị Diễm My, Lê Tiến Anh, Nguyễn Mạnh Tân, Hoàng Nguyễn Nhật Minh, Lê Minh Hoàng \\
+\textit{Kho lưu trữ mã nguồn}: \url{https://github.com/AIVIETNAM-AIO-MyNguyen/Module03_Debug-Team.git}
+}
+\end{minipage}
+}
+}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+% Tóm tắt nghiên cứu (Abstract) đặt trước Mục lục
+\input{sections/01_abstraction}
+
+\newpage
+\tableofcontents
+\newpage
+
+% 12 Sections chuẩn cấu trúc template
+\input{sections/02_introduction}
+\input{sections/03_research_problem}
+\input{sections/04_related_work}
+\input{sections/05_methodology}
+\input{sections/06_experiments}
+\input{sections/07_results}
+\input{sections/08_ablation_study}
+\input{sections/09_discussion}
+\input{sections/10_limitations}
+\input{sections/11_replicate_result}
+\input{sections/12_future_work}
+
+% Tài liệu tham khảo
+\newpage
+\printbibliography[heading=bibintoc, title={Tài liệu tham khảo (References)}]
+
+% 7 Phụ lục (Appendices)
+\newpage
+\appendix
+\section*{Phụ lục (Appendices)}
+\addcontentsline{toc}{section}{Phụ lục (Appendices)}
+
+\subsection*{Phụ lục 1: Thông tin Đơn vị Tổ chức AI VIET NAM}
+Chương trình nghiên cứu được triển khai trong khuôn khổ cuộc thi AI Conquer 2026 do Tổ chức AI VIET NAM bảo trợ học thuật. Thông tin chi tiết có thể tra cứu tại \url{https://aivietnam.edu.vn/}.
+
+\subsection*{Phụ lục 2: Kho Lưu trữ Mã nguồn Dự án}
+Mã nguồn đầy đủ, các notebook tái lập và pipeline thực nghiệm mở rộng được phát hành mở theo giấy phép MIT tại:
+\begin{center}
+    \url{https://github.com/AIVIETNAM-AIO-MyNguyen/Module03_Debug-Team.git}
+\end{center}
+
+\subsection*{Phụ lục 3: Tập Dữ liệu Cuộc thi IISE PG\&E 2025}
+Bộ dữ liệu chuỗi thời gian phụ tải và khí tượng 3 năm (2020--2022) của PG\&E được lưu trữ mở tại Zenodo:
+\begin{center}
+    \url{https://doi.org/10.5281/zenodo.17085273}
+\end{center}
+
+\subsection*{Phụ lục 4: Lưu trữ Điểm kiểm tra Mô hình (Model Checkpoints)}
+Các checkpoint trọng số của 24 mô hình XGBoost theo giờ, mô hình ElasticNet và meta-learner LightGBM được lưu trữ tuần tự trong thư mục \texttt{output/checkpoints/}.
+
+\subsection*{Phụ lục 5: Nhật ký và Bảng Số liệu Thực nghiệm Chi tiết}
+Toàn bộ các tệp nhật ký huấn luyện và các bảng kết quả so sánh định dạng CSV được lưu tại thư mục \texttt{output/}:
+\begin{itemize}
+    \item \texttt{results\_master\_paper\_comparison.csv}: Bảng đối chuẩn tổng thể 5 mô hình trên 4 giao thức.
+    \item \texttt{results\_conditional\_regime_errors.csv}: Sai số chi tiết trên 8 chế độ vận hành.
+    \item \texttt{results\_residual_correlation.csv}: Ma trận tương quan phần dư sai số.
+\end{itemize}
+
+\subsection*{Phụ lục 6: Bộ Sưu tập Đồ thị và Hình ảnh Phân giải Cao}
+Toàn bộ các biểu đồ từ Figure 1 đến Figure 11 được xuất bản ở định dạng vector và ảnh 300 DPI trong thư mục \texttt{figures/}.
+
+\subsection*{Phụ lục 7: Video Demo và Slide Thuyết trình Dự án}
+Tài liệu thuyết trình và video giải trình trực quan cơ chế hoạt động của thuật toán Context-Aware Stacking được lưu trữ tại liên kết đính kèm trong kho lưu trữ GitHub chính thức.
+
+\end{document}

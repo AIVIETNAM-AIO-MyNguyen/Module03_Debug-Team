@@ -1,0 +1,84 @@
+\section{Tái lập kết quả và mã nguồn (Replicate the results)}
+\label{sec:replicate_results}
+
+Nhằm tuân thủ nghiêm ngặt chuẩn mực liêm chính học thuật và bảo đảm khả năng tái lập độc lập của cộng đồng nghiên cứu, toàn bộ mã nguồn, cấu hình tham số và dữ liệu thực nghiệm đã được đóng gói mô-đun hóa hoàn chỉnh và công khai tại kho lưu trữ GitHub chính thức:
+\begin{center}
+    \url{https://github.com/AIVIETNAM-AIO-MyNguyen/Module03_Debug-Team.git}
+\end{center}
+
+\subsection{Cấu trúc Kho Lưu trữ Mã nguồn}
+Cấu trúc thư mục của dự án được phân tách rành mạch giữa gói tái lập bài báo gốc (\texttt{replication/}) và gói nghiên cứu mở rộng đề xuất (\texttt{src/}):
+
+\begin{aivnoutputbox}[Cấu trúc thư mục mã nguồn chuẩn hóa của dự án:]
+Module03_Debug-Team/
+|-- replication/                  # [GÓI ĐỘC LẬP TÁI LẬP BÀI BÁO GỐC]
+|   |-- config.py                 # Thiết lập đường dẫn và cấu hình đối chuẩn
+|   |-- data_loader.py            # Nạp dữ liệu thô và biến giả lịch
+|   |-- feature_engineering.py    # Phép biến đổi PCA và Lag/Lead
+|   |-- model_hourly_xgboost.py   # Mô hình dự báo 24-Hourly XGBoost
+|   |-- evaluate.py               # Giao thức kiểm thử Y1->Y2, Y2->Y1, 5-Fold CV
+|   |-- visualize.py              # Tái lập Đồ thị Figures 1-7 của bài báo gốc
+|   |-- run_replication.ipynb     # Notebook tương tác tái lập
+|   `-- run_replication.py        # Kịch bản dòng lệnh tái lập 1-click
+|
+|-- src/                          # [GÓI MỞ RỘNG ĐỘT PHÁ NGHIÊN CỨU ĐỀ XUẤT]
+|   |-- config.py                 # Đường dẫn, hằng số và danh mục biến mở rộng
+|   |-- data_loader.py            # Pipeline xử lý dữ liệu và lịch
+|   |-- feature_engineering.py    # HDD, CDD, Fourier, PCA, Lags
+|   |-- models/                   # Kiến trúc các mô hình dự báo
+|   |   |-- hourly_xgboost.py     # 24-Hourly XGBoost
+|   |   |-- single_xgboost.py     # Monolithic Global XGBoost
+|   |   `-- stacking.py           # Context-Aware Stacking Forecaster (CAS)
+|   |-- evaluation/               # Đánh giá đa giao thức và Year 3 Test
+|   |   `-- evaluate.py           # Bộ tính toán chỉ số RMSE, MAE, MAPE, R2
+|   |-- explainability/           # Giải thích mô hình
+|   |   `-- shap_analysis.py      # Sinh biểu đồ nhiệt SHAP 24 giờ
+|   `-- visualization/            # Kết xuất đồ thị phân tích chất lượng cao
+|       `-- visualize.py          # Vẽ Figures 6, 7, 8, ma trận tương quan
+|
+|-- run_extended_experiments.py   # MASTER RESEARCH PIPELINE (Chạy Stages 1 - 4)
+|-- Train.xlsx / Test.xlsx        # Dữ liệu phụ tải và thời tiết thực tế PG&E
+|-- requirements.txt              # Danh sách các thư viện phụ thuộc
+`-- output/                       # Thư mục kết xuất tự động
+    |-- predictions_xgboost.xlsx  # File kết quả dự báo Year 3 chính thức
+    |-- results_master_paper_comparison.csv
+    |-- results_conditional_regime_errors.csv
+    |-- results_residual_correlation.csv
+    `-- figures/                  # Toàn bộ biểu đồ định dạng vector/300 DPI
+\end{aivnoutputbox}
+
+\subsection{Quy trình Tái lập Thực nghiệm Tự động (One-Click Reproduction)}
+Người đọc có thể tái lập toàn bộ các bảng số liệu và hình ảnh trong báo cáo thông qua các bước đơn giản sau:
+
+\subsubsection{Bước 1: Thiết lập Môi trường Thực thi}
+Khởi tạo môi trường ảo Python và cài đặt các gói phụ thuộc tương thích:
+\begin{aivnoutputbox}[Lệnh cài đặt môi trường:]
+git clone https://github.com/AIVIETNAM-AIO-MyNguyen/Module03_Debug-Team.git
+cd Module03_Debug-Team
+python3 -m venv venv
+source venv/bin/activate        # Trên Linux / macOS
+# venv\Scripts\activate         # Trên Windows
+pip install -r requirements.txt
+\end{aivnoutputbox}
+
+\subsubsection{Bước 2: Tái lập Kết quả Baseline của Bài báo Gốc}
+Chạy kịch bản độc lập để kiểm chứng kết quả bài báo của Roy et al.~\cite{roy2025hourly}:
+\begin{aivnoutputbox}[Lệnh tái lập baseline bài báo gốc:]
+python replication/run_replication.py
+\end{aivnoutputbox}
+Lệnh trên sẽ tự động nạp tập dữ liệu huấn luyện, thực thi kiểm chứng chéo Bảng 4, đánh giá các cấu hình biến trễ Bảng 5, huấn luyện mô hình champion Lag1 và sinh các biểu đồ EDA Figures 1, 2, 3, 4 cùng đồ thị dự báo Year 3 Figures 6, 7.
+
+\subsubsection{Bước 3: Thực thi Toàn diện Khung Phương pháp Mở rộng (CAS Pipeline)}
+Thực thi chuỗi nghiên cứu mở rộng hoàn chỉnh gồm 4 giai đoạn bằng kịch bản duy nhất:
+\begin{aivnoutputbox}[Lệnh thực thi nghiên cứu mở rộng đề xuất:]
+python run_extended_experiments.py
+\end{aivnoutputbox}
+Quy trình sẽ tự động:
+\begin{enumerate}
+    \item Trích xuất các đặc trưng nhiệt động lực học HDD, CDD và sóng điều hòa Fourier liên tục (\textit{Stage 1}).
+    \item Phân tích ma trận tương quan phần dư sai số ($r = 0.6131$) và phân rã sai số trên 8 chế độ vận hành thực tế (\textit{Stage 2}).
+    \item So sánh đối chuẩn có hệ thống 5 mô hình trên 4 giao thức và lưu bảng kết quả tổng thể vào file \texttt{output/results\_master\_paper\_comparison.csv} (\textit{Stage 3}).
+    \item Tính toán ma trận SHAP trên 24 mô hình theo giờ, vẽ biểu đồ nhiệt \textit{fig\_shap\_heatmap.png} và xuất tệp dự báo phụ tải cuối cùng ra định dạng Excel và CSV (\textit{Stage 4}).
+\end{enumerate}
+
+Mọi thao tác đều được gán cố định $\text{random\_state} = 42$, bảo đảm kết quả đầu ra luôn nhất quán tuyệt đối giữa các lần chạy.

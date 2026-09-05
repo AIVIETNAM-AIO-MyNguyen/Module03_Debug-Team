@@ -1,0 +1,39 @@
+\section{Thảo luận (Discussion)}
+\label{sec:discussion}
+
+Kết quả thực nghiệm trong nghiên cứu này không chỉ mang lại những con số cải thiện ấn tượng trên bảng xếp hạng benchmark, mà còn mở ra những hàm ý học thuật và giá trị thực tiễn sâu sắc cho công tác vận hành lưới điện thông minh.
+
+\subsection{Giải thích Cơ chế Vật lý của Hiện tượng Chế độ Vận hành Kép (Dual-Regime)}
+Một trong những đóng góp học thuật cốt lõi của nghiên cứu là lần đầu tiên làm sáng tỏ sự phân hóa hiệu năng có tính bổ trợ giữa hai trường phái mô hình (tuyến tính chính quy hóa và cây quyết định phi tuyến) dưới các trạng thái vật lý khác nhau của hệ thống điện:
+
+\begin{enumerate}
+    \item \textbf{Vì sao ElasticNet vượt trội ở chế độ phụ tải nền ban đêm (00:00--06:00)?}
+    Trong khoảng thời gian từ nửa đêm đến rạng sáng, nhịp sinh hoạt của cư dân và hoạt động thương mại - sản xuất công nghiệp tạm lắng; bức xạ mặt trời hoàn toàn bằng 0; nhiệt độ ngoài trời giảm dần và biến thiên rất chậm. Đồ thị phụ tải lúc này đại diện cho phụ tải nền thuần túy (\textit{baseload}), bao gồm các thiết bị làm lạnh thực phẩm, hệ thống chiếu sáng công cộng, trung tâm dữ liệu và các phụ tải thiết yếu. Không có bất kỳ hiện tượng phân nhánh phi tuyến tính đột biến nào diễn ra trong giai đoạn này. 
+    
+    Các mô hình cây quyết định (như XGBoost), do bản chất sử dụng các phép chia ngưỡng trực giao (\textit{axis-aligned orthogonal splits}), có xu hướng phân mảnh không gian mẫu quá mức và vô tình "học" cả những nhiễu ngẫu nhiên nhỏ nhặt trong đêm, dẫn đến phương sai dự báo tăng. Ngược lại, mô hình tuyến tính ElasticNet với cấu trúc hàm siêu phẳng trơn tru và cơ chế điều chuẩn kết hợp $L_1/L_2$ hoạt động như một bộ lọc thông thấp (\textit{low-pass filter}) lý tưởng: nó triệt tiêu các dao động ngẫu nhiên và dự báo phụ tải nền với độ ổn định tuyệt đối (RMSE $131.33$~MW so với $141.37$~MW của XGBoost).
+    
+    \item \textbf{Vì sao XGBoost thống trị trong các đợt nắng nóng cực đoan (CDD $> 3^\circ\text{C}$)?}
+    Khi nhiệt độ ngoài trời vượt quá ngưỡng tiện nghi $25^\circ\text{C}$--$30^\circ\text{C}$, hiện tượng tích nhiệt trong bê tông và vật liệu xây dựng bắt đầu bão hòa, hiệu suất trao đổi nhiệt của máy nén không khí giảm mạnh, kéo theo sự kích hoạt đồng loạt của hàng triệu máy điều hòa nhiệt độ HVAC dân dụng và thương mại. Mối quan hệ giữa nhiệt độ và công suất điện tiêu thụ lúc này biến đổi theo hàm mũ phi tuyến tính cực kỳ dốc.
+    
+    Mô hình tuyến tính ElasticNet, do bị giới hạn bởi giả định siêu phẳng tuyến tính, hoàn toàn bất lực trong việc uốn cong để theo kịp sự bùng nổ của phụ tải đỉnh, dẫn đến hiện tượng sai số dưới (\textit{under-forecasting}) trầm trọng (RMSE bùng nổ lên tới $313.27$~MW). Trong khi đó, XGBoost với khả năng phân nhánh sâu linh hoạt và các hàm kích hoạt bậc thang đã nắm bắt chuẩn xác biên độ của các đỉnh nhọn phụ tải, duy trì sai số ở mức $244.16$~MW.
+\end{enumerate}
+
+\subsection{Bản chất Vượt trội của Context-Aware Stacking so với Trung bình Cố định}
+Trong thực tế nghiên cứu ensemble, một phương pháp thường được sử dụng là lấy trung bình giản đơn (\textit{Simple Model Averaging}) hoặc trung bình có trọng số cố định (\textit{Static Weighted Averaging}):
+\begin{equation}
+    \hat{y}_t = w_1 \hat{y}_{\text{enet}, t} + w_2 \hat{y}_{\text{xgb}, t}, \quad w_1 + w_2 = 1
+\end{equation}
+Tuy nhiên, cách làm tĩnh này tất yếu dẫn đến một sự thỏa hiệp tai hại: nếu gán trọng số lớn cho ElasticNet để tối ưu hóa phụ tải ban đêm thì sai số phụ tải đỉnh ban ngày sẽ tăng vọt; ngược lại, nếu ưu tiên XGBoost để bắt đỉnh mùa hè thì sai số ban đêm sẽ bị suy giảm.
+
+Kiến trúc Context-Aware Stacking (CAS) giải quyết triệt để sự đánh đổi này bằng cách biến meta-learner LightGBM thành một hàm trọng số động có điều kiện theo trạng thái môi trường:
+\begin{equation}
+    \hat{y}_{\text{CAS}, t} = w_{\text{enet}}\big(\mathbf{x}_{\text{context}, t}\big) \cdot \hat{y}_{\text{enet}, t} + w_{\text{xgb}}\big(\mathbf{x}_{\text{context}, t}\big) \cdot \hat{y}_{\text{xgb}, t} + \Delta\big(\mathbf{x}_{\text{context}, t}\big)
+\end{equation}
+Nhờ việc nhận đồng thời cả giờ trong ngày ($\text{Hour}$), độ-ngày làm mát ($\text{CDD}$), chu kỳ năm ($\text{Sin\_Year}, \text{Cos\_Year}$) và nhiệt độ trích xuất PCA, meta-learner tự động học được luật điều khiển mờ thông minh: tự động trao quyền cho ElasticNet vào lúc nửa đêm và chuyển dịch dứt khoát quyền quyết định sang XGBoost vào các buổi chiều oi bức, đồng thời ước lượng số hạng hiệu chỉnh phi tuyến $\Delta$. Đây chính là lý do vì sao CAS đạt mức cải thiện ngoạn mục vượt trội hơn cả hai mô hình thành phần trên tất cả 8 chế độ vận hành (Bảng~\ref{tab:regime_decomposition}).
+
+\subsection{Ý nghĩa Thực tiễn đối với Nhà Vận hành Hệ thống Điện (ISO)}
+Việc cắt giảm sai số RMSE từ $170.84$~MW xuống $141.81$~MW (giảm $29.03$~MW, tương đương $-17.0\%$) trên tập kiểm tra độc lập mang lại những giá trị kinh tế - kỹ thuật trực tiếp cho các công ty điện lực:
+\begin{itemize}
+    \item \textbf{Cắt giảm chi phí phát điện dự phòng (\textit{Spinning Reserve}):} Để phòng ngừa nguy cơ rã lưới do thiếu nguồn, đơn vị điều độ luôn phải duy trì một lượng công suất dự phòng quay tương ứng với mức sai số cực đại của dự báo phụ tải. Với mức giá biên dịch vụ điều độ dự phòng tại thị trường điện California (CAISO) dao động từ $20$ đến $35$~USD/MW-h, việc giảm $29.03$~MW sai số trên $8,760$ giờ vận hành trong năm giúp đơn vị vận hành PG\&E tiết kiệm ước tính từ \textbf{5.0 đến 7.6 triệu USD mỗi năm}!
+    \item \textbf{Ngăn ngừa sự cố mất điện luân phiên (\textit{Rolling Blackouts}):} Sai số trong các đợt sóng nhiệt mùa hè là nguyên nhân hàng đầu dẫn đến quá tải đường dây truyền tải và sụt áp hệ thống. Mô hình CAS giúp giảm sai số trong chế độ sóng nhiệt tới $28.72$~MW so với mô hình tốt nhất, cung cấp cảnh báo sớm tin cậy để điều độ nguồn phát kịp thời, bảo vệ an ninh cung cấp điện cho hàng triệu người dân.
+\end{itemize}

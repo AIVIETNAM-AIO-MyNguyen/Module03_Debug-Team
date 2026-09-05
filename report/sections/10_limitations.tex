@@ -1,0 +1,26 @@
+\section{Phân tích lỗi và hạn chế}
+\label{sec:limitations}
+
+Mặc dù đạt được những bước tiến vượt bậc về độ chính xác, tính trung thực học thuật đòi hỏi nhóm nghiên cứu phải phân tích thẳng thắn các trường hợp dự báo sai lệch và nhận diện rõ ràng các giới hạn nội tại của phương pháp cũng như của tập dữ liệu.
+
+\subsection{Phân tích các Trường hợp Mô hình Dự báo Sai lệch Lớn (Error Case Analysis)}
+Qua việc rà soát các mẫu dữ liệu có sai số tuyệt đối $|y_t - \hat{y}_t| > 400$~MW trên tập kiểm tra Year 3, chúng tôi xác định được hai nhóm trường hợp mô hình gặp khó khăn nhất:
+
+\begin{enumerate}
+    \item \textbf{Sự giao thoa bất thường giữa Ngày lễ và Đợt nhiệt cực đoan:}
+    Các sai số lớn nhất của mô hình tập trung vào kỳ nghỉ lễ Quốc khánh (tháng 7) và kỳ nghỉ Lễ Lao động (đầu tháng 9). Trong những ngày này, biến nhị phân $\text{Is\_Holiday} = 1$ kích hoạt cơ chế giảm phụ tải công nghiệp; tuy nhiên, khi một đợt sóng nhiệt lịch sử đồng thời ập đến, cư dân ở nhà sử dụng điều hòa công suất tối đa. Sự xung đột giữa hai xu hướng đối nghịch (giảm tải thương mại nhưng tăng vọt tải dân dụng) khiến mô hình bị nhiễu và có xu hướng dự báo non hơn thực tế khoảng $8\%$ đến $12\%$.
+    \item \textbf{Hiệu ứng Quán tính Tích nhiệt Đa ngày (\textit{Multi-Day Thermal Inertia}):}
+    Khi một đợt nắng nóng kéo dài liên tục từ 4 đến 6 ngày, kết cấu bê tông cốt thép của các tòa nhà đô thị bị "ngậm nhiệt" hoàn toàn và không thể giải nhiệt kịp vào ban đêm. Lúc này, công suất điều hòa nhiệt độ vào ngày thứ 4 cao hơn đáng kể so với ngày đầu tiên dù nhiệt độ đỉnh của hai ngày là như nhau. Do mô hình hiện tại mới chỉ tích hợp biến trễ động học ngắn hạn 1 giờ ($\text{Lag1}$), hệ thống chưa thể nắm bắt trọn vẹn lịch sử tích lũy nhiệt độ của 72 đến 96 giờ trước đó.
+\end{enumerate}
+
+\subsection{Hạn chế của Tập Dữ liệu}
+\begin{itemize}
+    \item \textbf{Độ phân giải không gian khí tượng còn thưa thớt:} Tập dữ liệu chỉ cung cấp thông số nhiệt độ và bức xạ tại 5 trạm quan trắc cố định cho một địa bàn lưới điện trải rộng hàng trăm kilômét với địa hình vô cùng phức tạp tại California (từ thung lũng nội địa khô nóng đến bờ biển có sương mù lạnh). Sự thưa thớt này không phản ánh được các vùng vi khí hậu (\textit{microclimates}) và hiệu ứng đảo nhiệt đô thị (\textit{urban heat island effect}).
+    \item \textbf{Thiếu vắng các biến khí quyển then chốt:} Dữ liệu hoàn toàn thiếu thông tin về độ ẩm tương đối (\textit{Relative Humidity}), tốc độ gió (\textit{Wind Speed}) và nhiệt độ bầu ướt (\textit{Wet-Bulb Temperature}). Trong thực tế kỹ thuật nhiệt, độ ẩm không khí chi phối mạnh mẽ đến sự bay hơi mồ hôi của cơ thể và quyết định trực tiếp tải ẩn (\textit{latent load}) của máy nén điều hòa không khí. Việc thiếu độ ẩm buộc mô hình phải ước lượng gián tiếp qua chuỗi nhiệt độ.
+\end{itemize}
+
+\subsection{Hạn chế của Phương pháp luận và Thiết lập Thí nghiệm}
+\begin{itemize}
+    \item \textbf{Độ nhạy của Stacking khi kích thước tập huấn luyện bị co hẹp:} Như ghi nhận trong bảng so sánh tổng thể, khi đánh giá giao thức Năm 1 $\to$ Năm 2 (chỉ có 1 năm huấn luyện tương đương 8,784 mẫu), việc chia tiếp thành 3 nếp gấp TimeSeriesSplit để sinh dự báo OOF khiến tập huấn luyện của meta-learner bị co lại chỉ còn khoảng 2,000--3,000 mẫu. Điều này làm tăng phương sai của meta-learner trong kịch bản dữ liệu hạn chế. Tuy nhiên, khi được cung cấp đủ 2 năm huấn luyện (17,520 mẫu), CAS lập tức phát huy sức mạnh vượt trội và đạt hiệu năng đỉnh cao trên tập kiểm tra Year 3.
+    \item \textbf{Chi phí điều chỉnh siêu tham số ngoại tuyến (\textit{Offline Tuning Overhead}):} Dù thời gian suy luận trực tiếp của toàn bộ pipeline CAS cực kỳ nhanh (dưới $15$~ms cho mỗi bước thời gian, đáp ứng hoàn hảo yêu cầu điều độ thời gian thực), quá trình tối ưu hóa siêu tham số cho meta-learner bằng Optuna đòi hỏi thời gian huấn luyện ban đầu kéo dài khoảng 2 đến 3 phút.
+\end{itemize}

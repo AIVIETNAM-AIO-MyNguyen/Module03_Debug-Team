@@ -1,0 +1,77 @@
+\section{Bài toán nghiên cứu (Research Problem)}
+\label{sec:research_problem}
+
+\subsection{Định nghĩa Hình thức Toán học của Bài toán STLF}
+Bài toán dự báo phụ tải điện ngắn hạn theo giờ được phát biểu dưới dạng một bài toán hồi quy chuỗi thời gian có biến ngoại sinh (\textit{Time Series Regression with Exogenous Variables}). 
+
+Gọi $t \in \mathbb{N}$ là chỉ số thời gian rời rạc theo từng giờ ($t = 1, 2, \dots, T$). Tại mỗi thời điểm $t$, hệ thống quan sát được một vector đặc trưng đầu vào $\mathbf{x}_t \in \mathbb{R}^D$ và giá trị phụ tải điện thực tế của lưới điện khu vực $y_t \in \mathbb{R}^+$ đo bằng đơn vị Megawatt (MW). Không gian đặc trưng đầu vào $\mathbf{x}_t$ bao gồm bốn nhóm biến số chính:
+\begin{equation}
+    \mathbf{x}_t = \left[ \mathbf{x}_t^{\text{temporal}}, \, \mathbf{x}_t^{\text{weather}}, \, \mathbf{x}_t^{\text{dynamics}}, \, \mathbf{x}_t^{\text{physics}} \right]^T \in \mathbb{R}^D
+\end{equation}
+trong đó:
+\begin{enumerate}
+    \item $\mathbf{x}_t^{\text{temporal}}$: Vector đặc trưng thời gian và lịch biểu, bao gồm giờ trong ngày ($\text{Hour}_t \in \{1, \dots, 24\}$), ngày trong tháng, tháng trong năm, chỉ báo ngày cuối tuần ($\text{Is\_Weekend}_t \in \{0, 1\}$) và chỉ báo ngày nghỉ lễ theo luật định bang California ($\text{Is\_Holiday}_t \in \{0, 1\}$).
+    \item $\mathbf{x}_t^{\text{weather}}$: Vector thông số khí tượng quan trắc đồng thời tại 5 trạm địa lý phân tán:
+    \begin{equation}
+        \mathbf{x}_t^{\text{weather}} = \left[ T_{1, t}, \dots, T_{5, t}, \, G_{1, t}, \dots, G_{5, t} \right]^T \in \mathbb{R}^{10}
+    \end{equation}
+    với $T_{i, t}$ là nhiệt độ không khí tại trạm $i$ ($^\circ\text{C}$) và $G_{i, t}$ là bức xạ mặt trời trực tiếp trên mặt phẳng ngang ($\text{W/m}^2$).
+    \item $\mathbf{x}_t^{\text{dynamics}}$: Các biến động học trễ (\textit{lag}) và dẫn trước (\textit{lead}) được tạo ra từ các thành phần chính PCA của nhiệt độ và bức xạ mặt trời: $\text{PCA\_Temp}_{t-k}, \text{PCA\_GHI}_{t-k}$ ($k \in \{1, 2, 3, 5\}$).
+    \item $\mathbf{x}_t^{\text{physics}}$: Các biến đặc trưng định hướng vật lý nhiệt động lực học do nhóm đề xuất, gồm Heating Degree Days ($\text{HDD}_t$), Cooling Degree Days ($\text{CDD}_t$), và các sóng điều hòa Fourier liên tục ($\sin, \cos$) theo chu kỳ nhật triều và chu kỳ năm thiên văn.
+\end{enumerate}
+
+\subsection{Mục tiêu Tối ưu hóa (Optimization Objective)}
+Mục tiêu của bài toán là học một hàm ánh xạ giả thuyết $f^*: \mathbb{R}^D \to \mathbb{R}^+$ thuộc lớp hàm $\mathcal{F}$ sao cho cực tiểu hóa kỳ vọng của hàm mất mát sai số toàn phương trên toàn bộ phân phối dữ liệu chưa quan sát trong tương lai:
+\begin{equation}
+    f^* = \argmin_{f \in \mathcal{F}} \; \mathbb{E}_{(\mathbf{x}_t, y_t) \sim \mathcal{D}} \left[ \mathcal{L}\big(y_t, f(\mathbf{x}_t)\big) \right]
+\end{equation}
+với hàm mất mát chuẩn hóa dạng sai số bình phương trung bình (\textit{Mean Squared Error} -- MSE):
+\begin{equation}
+    \mathcal{L}(y_t, \hat{y}_t) = \big(y_t - \hat{y}_t\big)^2
+\end{equation}
+Đặc biệt, trong bài toán STLF thực tế, mô hình phải đảm bảo tính tổng quát hóa vượt trội khi ngoại suy sang các năm kiểm tra tiếp theo mà không xảy ra hiện tượng quá khớp (\textit{overfitting}) do trôi dạt phân phối thời tiết (\textit{covariate shift}).
+
+\subsection{Các Tiêu chuẩn Đánh giá Định lượng (Evaluation Metrics)}
+Để đánh giá toàn diện năng lực của các mô hình dự báo, nghiên cứu này sử dụng năm chỉ số đo lường chuẩn hóa trong kỹ thuật năng lượng:
+\begin{enumerate}
+    \item \textbf{Căn bậc hai sai số bình phương trung bình (\textit{Root Mean Squared Error} -- RMSE):}
+    \begin{equation}
+        \text{RMSE} = \sqrt{\frac{1}{N} \sum_{t=1}^N \big(y_t - \hat{y}_t\big)^2} \quad [\text{MW}]
+    \end{equation}
+    Đây là tiêu chí xếp hạng chính thức của cuộc thi IISE PG\&E Challenge, phạt rất nặng các sai số dự báo lớn tại các đỉnh phụ tải cực đoan.
+    \item \textbf{Sai số tuyệt đối trung bình (\textit{Mean Absolute Error} -- MAE):}
+    \begin{equation}
+        \text{MAE} = \frac{1}{N} \sum_{t=1}^N \big|y_t - \hat{y}_t\big| \quad [\text{MW}]
+    \end{equation}
+    Đo lường mức độ lệch trung bình kỳ vọng mà không bị phóng đại bởi các giá trị ngoại lai (\textit{outliers}).
+    \item \textbf{Sai số phần trăm tuyệt đối trung bình (\textit{Mean Absolute Percentage Error} -- MAPE):}
+    \begin{equation}
+        \text{MAPE} = \frac{100\%}{N} \sum_{t=1}^N \left| \frac{y_t - \hat{y}_t}{y_t} \right| \quad [\%]
+    \end{equation}
+    Đo lường độ chính xác tương đối theo tỷ lệ phần trăm của tải thực tế.
+    \item \textbf{Sai số phần trăm tuyệt đối đối xứng (\textit{Symmetric MAPE} -- sMAPE):}
+    \begin{equation}
+        \text{sMAPE} = \frac{100\%}{N} \sum_{t=1}^N \frac{|y_t - \hat{y}_t|}{(|y_t| + |\hat{y}_t|)/2} \quad [\%]
+    \end{equation}
+    Giúp khắc phục nhược điểm mất đối xứng của MAPE khi tải thực tế có giá trị rất nhỏ.
+    \item \textbf{Hệ số xác định (\textit{Coefficient of Determination} -- $R^2$ Score):}
+    \begin{equation}
+        R^2 = 1 - \frac{\sum_{t=1}^N (y_t - \hat{y}_t)^2}{\sum_{t=1}^N (y_t - \bar{y})^2}
+    \end{equation}
+    với $\bar{y} = \frac{1}{N}\sum_{t=1}^N y_t$. Chỉ số này biểu thị tỷ lệ phương sai của phụ tải thực tế được mô hình giải thích thành công.
+\end{enumerate}
+
+\subsection{Các Giả thuyết Nghiên cứu (Research Hypotheses)}
+Nghiên cứu này được dẫn dắt bởi ba giả thuyết khoa học mang tính nền tảng:
+
+\begin{notebox}{Giả thuyết Nghiên cứu H1 (Physics-Informed Inductive Bias)}
+Việc tích hợp các đặc trưng vật lý công trình HDD và CDD với ngưỡng cơ sở $18^\circ\text{C}$ cùng các sóng điều hòa Fourier liên tục sẽ mô hình hóa chính xác phản ứng phi tuyến ngắt quãng của hệ thống điều hòa nhiệt độ HVAC và tính liên tục mùa thiên văn, giúp giảm đáng kể phương sai dự báo so với việc chỉ sử dụng biến trễ PCA thuần túy.
+\end{notebox}
+
+\begin{notebox}{Giả thuyết Nghiên cứu H2 (Regime-Dependent Model Complementarity)}
+Mô hình tuyến tính ElasticNet (L1/L2 regularization) và mô hình phi tuyến dạng cây XGBoost sở hữu các cơ chế học bù trừ nhau dưới các chế độ vận hành khác nhau của lưới điện. Phần dư sai số của hai mô hình sẽ có hệ số tương quan thấp ($r \ll 1.0$), tạo ra không gian tối ưu cho các thuật toán ensemble kết hợp.
+\end{notebox}
+
+\begin{notebox}{Giả thuyết Nghiên cứu H3 (Context-Aware Stacking Superiority)}
+Một kiến trúc Stacking có mô hình meta-learner nhận biết đồng thời cả đầu ra dự báo của mô hình cơ sở và vector ngữ cảnh môi trường thời gian thực sẽ học được quy luật định tuyến động (\textit{dynamic routing}), vượt trội hơn bất kỳ mô hình đơn lẻ nào và vượt trội hơn các giải pháp kết hợp trọng số cố định (\textit{static weighted averaging}).
+\end{notebox}

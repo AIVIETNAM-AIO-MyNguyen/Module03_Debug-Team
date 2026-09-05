@@ -1,0 +1,9 @@
+Regime,Sample_Count,ElasticNet_RMSE,XGBoost_RMSE,Best_Base_Model,CAS_Ensemble_RMSE,CAS_Gain_vs_Best_Base (MW)
+"High CDD (Summer Peaks, CDD > 3°C)",2196,313.27,244.16,XGBoost,215.44,28.72
+"High HDD (Winter Heating, HDD > 5°C)",1798,131.74,100.14,XGBoost,93.25,6.9
+Mild / Neutral Weather (HDD<=1 & CDD<=1),1236,187.75,145.46,XGBoost,138.51,6.96
+Peak Operating Hours (15:00 - 19:00),1825,243.48,171.72,XGBoost,163.45,8.27
+Off-Peak Night Hours (00:00 - 06:00),2190,131.33,141.37,ElasticNet,100.5,30.83
+Mid-Day Solar Hours (10:00 - 14:00),1825,266.69,205.26,XGBoost,199.17,6.09
+Weekdays (Mon - Fri),6240,207.53,164.44,XGBoost,147.49,16.94
+Weekends & Holidays,2760,215.04,176.16,XGBoost,158.49,17.67

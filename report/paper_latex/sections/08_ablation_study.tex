@@ -1,0 +1,101 @@
+\section{Ablation Study và phân tích bổ sung}
+\label{sec:ablation_study}
+
+Phần này thực hiện các phân tích bóc tách thành phần có kiểm soát (\textit{Ablation Study}) nhằm kiểm chứng sâu sắc tính xác đáng của ba giả thuyết nghiên cứu (H1, H2, H3) và trả lời trọn vẹn ba câu hỏi nghiên cứu (RQ1, RQ2, RQ3).
+
+\subsection{Bóc tách Tác động của Kỹ nghệ Đặc trưng Định hướng Vật lý}
+Để trả lời câu hỏi \textbf{RQ1} và kiểm chứng giả thuyết \textbf{H1}, chúng tôi tiến hành cô lập từng thành phần đặc trưng được thêm vào mô hình 24-Hourly XGBoost. Bảng~\ref{tab:ablation_features} thể hiện sự biến thiên của sai số trên cả kiểm chứng chéo tập huấn luyện và tập kiểm tra độc lập Year 3.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Phân tích bóc tách thành phần đặc trưng trên mô hình 24-Hourly XGBoost.}
+    \label{tab:ablation_features}
+    \begin{tabular}{lcccc}
+        \toprule
+        \textbf{Cấu hình Đặc trưng} & \textbf{Số biến} & \textbf{CV RMSE (MW)} & \textbf{Year 3 RMSE (MW)} & \textbf{Độ giảm sai số} \\
+        \midrule
+        1. Baseline Lag1 (Bài báo gốc) & 18 & 256.01 & 171.66 & \textit{Gốc} \\
+        2. Baseline Lag1 + Fourier Harmonics & 22 & 251.52 & 161.41 & \textbf{$-10.25$ MW} \\
+        3. Baseline Lag1 + Fourier + HDD/CDD & 24 & \textbf{251.47} & \textbf{160.65} & \textbf{$-11.01$ MW} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Kết quả thực nghiệm khẳng định giả thuyết \textbf{H1}:
+\begin{itemize}
+    \item Việc bổ sung chuỗi sóng Fourier liên tục ($\sin/\cos$) theo chu kỳ năm và ngày mang lại sự cải thiện mạnh mẽ nhất, cắt giảm ngay lập tức $10.25$~MW trên tập Year 3. Điều này chứng minh việc thay thế các biến giả rời rạc bằng các hàm sóng liên tục giúp mô hình nắm bắt trơn tru quy luật biến thiên thiên văn, loại bỏ hoàn toàn các lỗi nhảy bậc thang tại biên giới giữa các tháng.
+    \item Khi tích hợp thêm các biến ngưỡng vật lý nhiệt độ HDD và CDD (ngưỡng cơ sở $18^\circ\text{C}$), sai số tiếp tục giảm thêm $0.76$~MW (đạt $160.65$~MW). Chỉ số CDD hoạt động như một hàm chỉnh lưu phi tuyến, cung cấp tín hiệu kích hoạt rõ ràng cho mô hình cây khi đối mặt với các đợt tăng vọt nhu cầu điều hòa không khí.
+\end{itemize}
+
+\subsection{Phân tích Ma trận Tương quan Phần dư Sai số}
+Để trả lời câu hỏi \textbf{RQ2} và kiểm chứng giả thuyết \textbf{H2}, chúng tôi tính toán ma trận tương quan Pearson giữa các chuỗi phần dư sai số (\textit{residuals}) $e_t = y_t - \hat{y}_t$ của mô hình tuyến tính ElasticNet (với L1/L2 regularization) và mô hình phi tuyến XGBoost trên tập kiểm tra độc lập Year 3 (Hình~\ref{fig:residual_correlation}).
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.48\textwidth]{figures/Figure_Residual_Correlation_Matrix.png}
+    \caption{Ma trận Hệ số Tương quan Phần dư Pearson giữa ElasticNet và XGBoost ($r = 0.6131$).}
+    \label{fig:residual_correlation}
+\end{figure}
+
+Kết quả ghi nhận hệ số tương quan phần dư chỉ đạt:
+\begin{equation}
+    r(e_{\text{enet}}, e_{\text{xgb}}) = \mathbf{0.6131}
+\end{equation}
+Mức tương quan vừa phải này chứng minh rằng ElasticNet và XGBoost sở hữu các cơ chế phát sinh sai số hoàn toàn khác nhau. Khi một mô hình dự báo lệch, mô hình kia thường duy trì được độ ổn định, cung cấp nền tảng toán học lý tưởng cho kỹ thuật Stacking.
+
+\subsection{Phân tích Sai số theo Chế độ Vận hành Lưới điện (Conditional Regime Decomposition)}
+Để làm sáng tỏ cơ chế bù trừ sai số, chúng tôi chia tập kiểm tra Year 3 thành 8 chế độ vận hành khí tượng và thời gian thực tế. Bảng~\ref{tab:regime_decomposition} và Hình~\ref{fig:conditional_regimes} so sánh chi tiết sai số RMSE của ElasticNet, XGBoost và mô hình đề xuất Context-Aware Stacking (CAS).
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \caption{Phân tích Sai số RMSE (MW) theo các Chế độ Vận hành Thực tế của Lưới điện.}
+    \label{tab:regime_decomposition}
+    \begin{tabularx}{\textwidth}{lccccc}
+        \toprule
+        \textbf{Chế độ Vận hành} & \textbf{Số mẫu} & \textbf{ElasticNet} & \textbf{XGBoost} & \textbf{Mô hình tốt hơn} & \textbf{CAS Đề xuất} \\
+        \midrule
+        \textbf{Phụ tải nền ban đêm (00:00--06:00)} & 2,190 & \textbf{131.33} & 141.37 & \textit{ElasticNet} & \textbf{100.50} ($-30.83$) \\
+        \textbf{Sóng nhiệt mùa hè (CDD $> 3^\circ\text{C}$)} & 2,196 & 313.27 & \textbf{244.16} & \textit{XGBoost} & \textbf{215.44} ($-28.72$) \\
+        \textbf{Cao điểm chiều tối (15:00--19:00)} & 1,825 & 243.48 & \textbf{171.72} & \textit{XGBoost} & \textbf{163.45} ($-8.27$) \\
+        \textbf{Giữa trưa bức xạ cao (10:00--14:00)} & 1,825 & 266.69 & \textbf{205.26} & \textit{XGBoost} & \textbf{199.17} ($-6.09$) \\
+        \textbf{Mùa đông sưởi ấm (HDD $> 5^\circ\text{C}$)} & 1,798 & 131.74 & \textbf{100.14} & \textit{XGBoost} & \textbf{93.25} ($-6.90$) \\
+        \textbf{Thời tiết ôn hòa (HDD$\le 1$ \& CDD$\le 1$)} & 1,236 & 187.75 & \textbf{145.46} & \textit{XGBoost} & \textbf{138.51} ($-6.96$) \\
+        \textbf{Ngày làm việc (Thứ Hai -- Thứ Sáu)} & 6,240 & 207.53 & \textbf{164.44} & \textit{XGBoost} & \textbf{147.49} ($-16.94$) \\
+        \textbf{Ngày cuối tuần và Nghỉ lễ} & 2,760 & 215.04 & \textbf{176.16} & \textit{XGBoost} & \textbf{158.49} ($-17.67$) \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.92\textwidth]{figures/Figure_8_Conditional_Regime_Errors.png}
+    \caption{So sánh sai số RMSE giữa ElasticNet, XGBoost và CAS theo từng chế độ vận hành.}
+    \label{fig:conditional_regimes}
+\end{figure}
+
+Kết quả trong Bảng~\ref{tab:regime_decomposition} cung cấp hai phát hiện mang tính đột phá:
+\begin{enumerate}
+    \item \textbf{Sự thống trị của ElasticNet trong chế độ phụ tải nền ban đêm:} Trong khung giờ 00:00--06:00 (khi hoạt động của con người ngừng nghỉ, không có bức xạ mặt trời, phụ tải chủ yếu là phụ tải nền đều đặn), mô hình tuyến tính ElasticNet đạt RMSE $131.33$~MW, \textbf{vượt trội hơn hẳn mô hình cây XGBoost ($141.37$~MW)}. Điều này khẳng định trong môi trường ít biến động phi tuyến, mô hình tuyến tính ElasticNet ít bị overfit với nhiễu và cho tính tổng quát hóa cao hơn.
+    \item \textbf{Sự áp đảo của XGBoost trong các đợt sóng nhiệt:} Ngược lại hoàn toàn, khi nhiệt độ vượt xa ngưỡng cơ sở ($\text{CDD} > 3^\circ\text{C}$), XGBoost đạt RMSE $244.16$~MW, đánh bại áp đảo ElasticNet ($313.27$~MW). Lúc này, các quan hệ phi tuyến do hệ thống điều hòa không khí bùng nổ đòi hỏi cấu trúc phân nhánh sâu của cây quyết định.
+    \item \textbf{Ưu thế tuyệt đối của Context-Aware Stacking:} Mô hình CAS đề xuất không chỉ đơn thuần chọn mô hình tốt hơn, mà \textbf{vượt trội hơn cả hai mô hình cơ sở trên toàn bộ 8 chế độ vận hành}. Đáng chú ý nhất, ở chế độ ban đêm, CAS hạ RMSE xuống chỉ còn \textbf{$100.50$~MW} (giảm tới $30.83$~MW so với ElasticNet); ở chế độ sóng nhiệt, CAS hạ RMSE xuống \textbf{$215.44$~MW} (giảm tới $28.72$~MW so với XGBoost). Điều này chứng minh rõ ràng giả thuyết \textbf{H3}: meta-learner LightGBM đã học được cơ chế định tuyến ngữ cảnh tối ưu theo thời gian thực.
+\end{enumerate}
+
+\subsection{Giải thích Động học Đặc trưng theo Giờ bằng Biểu đồ Nhiệt SHAP}
+Để giải thích sự biến thiên động học của các đặc trưng trong suốt 24 giờ trong ngày, chúng tôi tính toán giá trị SHAP trung bình tuyệt đối (\textit{Mean Absolute SHAP Value})~\cite{lundberg2017shap} trên 24 mô hình XGBoost theo giờ (Hình~\ref{fig:shap_heatmap_diurnal}).
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.98\textwidth]{figures/fig_shap_heatmap.png}
+    \caption{Biểu đồ Nhiệt SHAP: Động học Tầm quan trọng của Đặc trưng theo từng Giờ trong Ngày.}
+    \label{fig:shap_heatmap_diurnal}
+\end{figure}
+
+Phân tích định lượng từ Bảng số liệu SHAP cho thấy:
+\begin{itemize}
+    \item \textbf{Chu kỳ năm liên tục ($\text{Sin\_Year}$):} Chiếm vị trí số 1 về tổng mức độ ảnh hưởng (Tổng SHAP $= 1,830.43$). Đặc trưng này duy trì tầm quan trọng ổn định xuyên suốt 24 giờ và đạt giá trị cực đại vào các giờ ban ngày (đạt $149.94$ tại Giờ 16), đóng vai trò như một trục điều hòa chu kỳ mùa vững chắc.
+    \item \textbf{Biến nhiệt độ trễ ($\text{PCA\_Temp\_Lag1}$) và nhiệt độ tức thời ($\text{PCA\_Temp}$):} Lần lượt xếp vị trí thứ 2 và thứ 4 (Tổng SHAP $= 1,709.67$ và $1,205.78$). Mức độ tác động của nhiệt độ bùng nổ mạnh mẽ nhất từ 11:00 đến 18:00 (đạt đỉnh $197.64$ tại Giờ 15), trùng khớp hoàn hảo với hiệu ứng quán tính tích nhiệt của các tòa nhà đô thị.
+    \item \textbf{Chỉ báo Cuối tuần ($\text{Is\_Weekend}$):} Đứng vị trí thứ 3 (Tổng SHAP $= 1,574.32$). Tầm ảnh hưởng đạt đỉnh vào đầu giờ sáng từ 07:00 đến 09:00 ($>120.0$), phản ánh sự chênh lệch sâu sắc giữa thói quen bắt đầu giờ làm việc của ngày trong tuần và sự nghỉ ngơi vào cuối tuần.
+    \item \textbf{Độ-ngày làm mát ($\text{CDD}$):} Chiếm vị trí thứ 5 (Tổng SHAP $= 827.47$). Tầm quan trọng của CDD tăng vọt trong khung giờ cao điểm nhiệt độ chiều tối từ 14:00 đến 18:00 (đạt đỉnh $123.97$ tại Giờ 16), khẳng định vai trò quyết định của nó trong việc dự báo phụ tải đỉnh làm mát.
+    \item \textbf{Bức xạ mặt trời ($\text{PCA\_GHI}$):} Tuân thủ nghiêm ngặt quy luật vật lý: SHAP value hoàn toàn bằng $0.0$ từ 00:00 đến 05:00 và từ 21:00 đến 24:00 (khi trời tối), và tăng vọt lên mức trên $100.0$ vào các giờ trưa nắng (09:00--12:00), mô tả chính xác hiệu ứng giảm phụ tải ròng do điện mặt trời phân tán phát điện lên lưới.
+\end{itemize}

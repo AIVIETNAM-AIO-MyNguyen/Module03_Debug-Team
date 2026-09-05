@@ -1,0 +1,4 @@
+Model,Test_Case,R2,RMSE,MAPE,sMAPE
+XGBoost,Year 1 -> Year 2,0.85,158.6,5.4,5.4
+XGBoost,Year 2 -> Year 1,0.85,177.6,5.6,5.6
+XGBoost,Both years (CV),0.67,255.6,6.9,7.2

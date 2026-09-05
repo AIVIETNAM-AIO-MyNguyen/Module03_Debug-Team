@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Context-Aware Dual-Regime Stacking | AI Conquer 2026</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- KaTeX for Math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    code, pre { font-family: 'JetBrains Mono', monospace; }
+    .aivn-green { color: #344F1E; }
+    .bg-aivn-green { background-color: #344F1E; }
+    .border-aivn-green { border-color: #344F1E; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+  <!-- Top Header Navigation -->
+  <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-100 text-emerald-800">
+          AI Conquer 2026
+        </span>
+        <span class="text-sm font-semibold text-slate-500 hidden sm:inline">|</span>
+        <h1 class="text-sm sm:text-base font-bold text-slate-900 truncate max-w-md sm:max-w-xl">
+          Context-Aware Dual-Regime Stacking (STLF)
+        </h1>
+      </div>
+      <div class="flex items-center space-x-3">
+        <a href="https://github.com/AIVIETNAM-AIO-MyNguyen/Module03_Debug-Team.git" target="_blank"
+           class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-lg bg-slate-900 text-white text-xs sm:text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          <span>GitHub</span>
+        </a>
+        <a href="https://doi.org/10.5281/zenodo.17085273" target="_blank"
+           class="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 text-xs sm:text-sm font-medium transition-colors">
+          <span>Zenodo Dataset</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+      <!-- Left Sticky Sidebar Table of Contents -->
+      <aside class="hidden lg:block lg:col-span-3">
+        <div class="sticky top-24 bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Mục Lục Báo Cáo</h3>
+          <nav class="space-y-1 text-sm">
+            <a href="#abstract" class="block px-3 py-1.5 rounded-md text-slate-600 hover:text-emerald-800 hover:bg-slate-100 font-medium transition-colors">Tóm tắt Nghiên cứu</a>
+            <a href="#intro" class="block px-3 py-1.5 rounded-md text-slate-600 hover:text-emerald-800 hover:bg-slate-100 transition-colors">1. Giới thiệu</a>
+            <a href="#problem" class="block px-3 py-1.5 rounded-md text-slate-600 hover:text-emerald-800 hover:bg-slate-100 transition-colors">2. Bài toán Nghiên cứu</a>
+            <a href="#related" class="block px-3 py-1.5 rounded-md text-slate-600 hover:text-emerald-800 hover:bg-slate-100 transition-colors">3. Tổng quan Nghiên cứu</a>
+            <a href="#methodology" class="block px-3 py-1.5 rounded-md text-slate-600 hover:text-emerald-800 hover:bg-slate-100 transition-colors">4. Phương pháp (CAS)</a>
+            <a href="#experiments" class="block px-3 py-1.5 rounded-md text-slate-600 hover:text-emerald-800 hover:bg-slate-100 transition-colors">5. Dữ liệu & Thiết lập</a>
+            <a href="#results" class="block px-3 py-1.5 rounded-md text-slate-600 hover:text-emerald-800 hover:bg-slate-100 transition-colors">6. Kết quả Thực nghiệm</a>
+            <a href="#ablation" class="block px-3 py-1.5 rounded-md text-slate-600 hover:text-emerald-800 hover:bg-slate-100 transition-colors">7. Ablation & Dual-Regime</a>
+            <a href="#discussion" class="block px-3 py-1.5 rounded-md text-slate-600 hover:text-emerald-800 hover:bg-slate-100 transition-colors">8. Thảo luận Học thuật</a>
+            <a href="#limitations" class="block px-3 py-1.5 rounded-md text-slate-600 hover:text-emerald-800 hover:bg-slate-100 transition-colors">9. Phân tích Lỗi & Hạn chế</a>
+            <a href="#replication" class="block px-3 py-1.5 rounded-md text-slate-600 hover:text-emerald-800 hover:bg-slate-100 transition-colors">10. Hướng dẫn Tái lập</a>
+            <a href="#conclusion" class="block px-3 py-1.5 rounded-md text-slate-600 hover:text-emerald-800 hover:bg-slate-100 transition-colors">11. Kết luận & Mở rộng</a>
+          </nav>
+          
+          <hr class="border-slate-100">
+          
+          <div class="space-y-2">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Tải về Dữ liệu</span>
+            <a href="output/results_master_paper_comparison.csv" download class="block text-xs text-emerald-700 hover:underline">📥 Kết quả Master Comparison (CSV)</a>
+            <a href="output/results_conditional_regime_errors.csv" download class="block text-xs text-emerald-700 hover:underline">📥 Lỗi Phân rã 8 Chế độ (CSV)</a>
+            <a href="output/predictions_xgboost.csv" download class="block text-xs text-emerald-700 hover:underline">📥 Dự báo Year 3 Full 8760h (CSV)</a>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Paper Content -->
+      <main class="lg:col-span-9 space-y-10">
+
+        <!-- Hero Card -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
+              AI VIET NAM -- AI Conquer 2026
+            </span>
+            <span class="px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-semibold">
+              Hướng Du học (Research Track)
+            </span>
+            <span class="px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold">
+              IEEE Template Compliance
+            </span>
+          </div>
+
+          <h1 class="text-2xl sm:text-4xl font-extrabold text-slate-900 leading-tight">
+            Context-Aware Dual-Regime Stacking Ensemble với Physics-Informed Feature Engineering cho Dự báo Phụ tải Điện Giờ
+          </h1>
+
+          <div class="border-t border-b border-slate-100 py-4">
+            <p class="text-sm font-semibold text-slate-900">Nhóm tác giả: <span class="text-emerald-800 font-bold">Debug Team</span></p>
+            <p class="text-sm text-slate-600 mt-1">
+              Nguyễn Thị Diễm My &bull; Lê Tiến Anh &bull; Nguyễn Mạnh Tân &bull; Hoàng Nguyễn Nhật Minh &bull; Lê Minh Hoàng
+            </p>
+          </div>
+
+          <!-- Highlight Metric Stats -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <span class="text-xs font-semibold text-slate-500 uppercase">Year 3 RMSE</span>
+              <div class="text-2xl sm:text-3xl font-black text-emerald-700 mt-1">141.81 <span class="text-xs text-slate-500 font-normal">MW</span></div>
+              <span class="text-xs text-emerald-600 font-semibold">&minus;17.0% vs Baseline</span>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <span class="text-xs font-semibold text-slate-500 uppercase">R² Score</span>
+              <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">0.9136</div>
+              <span class="text-xs text-emerald-600 font-semibold">&uarr; từ 0.8746</span>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <span class="text-xs font-semibold text-slate-500 uppercase">Year 3 MAPE</span>
+              <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">4.75%</div>
+              <span class="text-xs text-emerald-600 font-semibold">&darr; từ 5.38%</span>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <span class="text-xs font-semibold text-slate-500 uppercase">Residual Correlation</span>
+              <div class="text-2xl sm:text-3xl font-black text-indigo-700 mt-1">0.6131</div>
+              <span class="text-xs text-indigo-600 font-semibold">Error Diversity cao</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: Abstract -->
+        <section id="abstract" class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-4">
+          <div class="flex items-center space-x-2 border-b border-slate-100 pb-3">
+            <span class="h-6 w-1.5 bg-emerald-600 rounded-full"></span>
+            <h2 class="text-xl font-bold text-slate-900">Tóm tắt Nghiên cứu (Abstract)</h2>
+          </div>
+          <p class="text-slate-700 leading-relaxed text-justify">
+            Nghiên cứu này thuộc lĩnh vực <em>Machine Learning</em> ứng dụng trong Hệ thống Năng lượng Thông minh, giải quyết bài toán <strong>Dự báo Phụ tải Điện Ngắn hạn (STLF)</strong> theo từng giờ trên lưới điện của PG&E tại California. Khởi nguồn từ việc tái lập công trình đối chuẩn của Roy et al. (arXiv:2505.11390) tại cuộc thi <em>IISE PG&E Energy Analytics Challenge 2025</em>, chúng tôi xác thực luận điểm rằng các mô hình dạng bảng phân đoạn theo giờ (24 mô hình XGBoost) vượt trội hơn Transformers (PatchTST, Informer, Autoformer). Tuy nhiên, nhận diện 3 khoảng trống lớn về thiếu tri thức nhiệt động lực học công trình, sự gián đoạn của biến giả tháng và bỏ ngỏ đa dạng sai số mô hình, nhóm đề xuất khung phương pháp mở rộng:
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+            <div class="p-4 rounded-lg bg-emerald-50/60 border border-emerald-200">
+              <h4 class="font-bold text-emerald-900 text-sm">1. Physics-Informed Features</h4>
+              <p class="text-xs text-emerald-800 mt-1">Heating & Cooling Degree Days (HDD/CDD ở ngưỡng 18°C) + Chuỗi điều hòa Fourier liên tục.</p>
+            </div>
+            <div class="p-4 rounded-lg bg-blue-50/60 border border-blue-200">
+              <h4 class="font-bold text-blue-900 text-sm">2. Dual-Regime Discovery</h4>
+              <p class="text-xs text-blue-800 mt-1">Phát hiện tương quan phần dư thấp (r=0.6131): ElasticNet thắng ban đêm, XGBoost thắng nắng nóng cực đoan.</p>
+            </div>
+            <div class="p-4 rounded-lg bg-purple-50/60 border border-purple-200">
+              <h4 class="font-bold text-purple-900 text-sm">3. Context-Aware Stacking</h4>
+              <p class="text-xs text-purple-800 mt-1">Meta-learner LightGBM điều hòa theo ngữ cảnh thời gian thực, tự động định tuyến độ tin cậy tối ưu.</p>
+            </div>
+          </div>
+          <p class="text-slate-700 leading-relaxed text-justify pt-2">
+            Trên tập kiểm tra độc lập Year 3 (2022, 8,760 giờ), mô hình CAS đề xuất đạt kỷ lục với <strong>RMSE 141.81 MW</strong>, <strong>MAPE 4.75%</strong>, và <strong>$R^2 = 0.9136$</strong>, cắt giảm <strong>&minus;29.03 MW (&minus;17.0% RMSE)</strong> so với baseline gốc của bài báo.
+          </p>
+        </section>
+
+        <!-- Section 1 & 2: Intro & Problem -->
+        <section id="intro" class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+          <div class="flex items-center space-x-2 border-b border-slate-100 pb-3">
+            <span class="h-6 w-1.5 bg-emerald-600 rounded-full"></span>
+            <h2 class="text-xl font-bold text-slate-900">1. Giới thiệu & 2. Bài toán Nghiên cứu</h2>
+          </div>
+          
+          <div class="space-y-4 text-slate-700 leading-relaxed text-justify">
+            <p>
+              Cân bằng công suất tức thời trong lưới điện:
+              $$\sum_{i} P_{\text{gen}, i}(t) = \sum_{j} P_{\text{load}, j}(t) + P_{\text{loss}}(t)$$
+              là tôn chỉ an toàn tuyệt đối. Mọi sai số dự báo phụ tải đỉnh đều buộc các nhà vận hành hệ thống điện (ISO) phải huy động công suất phát dự phòng quay (*spinning reserve*) với chi phí thị trường giao ngay khổng lồ.
+            </p>
+            <p>
+              Bài toán tìm hàm ánh xạ tối ưu $f^*: \mathbb{R}^D \to \mathbb{R}^+$ cực tiểu hóa hàm mất mát bình phương trung bình:
+              $$f^* = \argmin_{f \in \mathcal{F}} \; \mathbb{E}_{(\mathbf{x}_t, y_t) \sim \mathcal{D}} \left[ \big(y_t - f(\mathbf{x}_t)\big)^2 \right]$$
+              với vector đầu vào $\mathbf{x}_t = [\mathbf{x}_t^{\text{temporal}}, \mathbf{x}_t^{\text{weather}}, \mathbf{x}_t^{\text{dynamics}}, \mathbf{x}_t^{\text{physics}}]^T$.
+            </p>
+          </div>
+        </section>
+
+        <!-- Section 4: Methodology -->
+        <section id="methodology" class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+          <div class="flex items-center space-x-2 border-b border-slate-100 pb-3">
+            <span class="h-6 w-1.5 bg-emerald-600 rounded-full"></span>
+            <h2 class="text-xl font-bold text-slate-900">4. Phương pháp Nghiên cứu (CAS Architecture)</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+            <div class="space-y-4 text-slate-700 text-sm">
+              <h4 class="font-bold text-slate-900 text-base">Khử Đa cộng tuyến qua PCA</h4>
+              <p>
+                Chỉ số VIF của nhiệt độ và bức xạ mặt trời trước khi xử lý lên tới $52.70$ và $1055.70$. Sau khi chiếu sang thành phần chính thứ nhất, $\text{VIF}(\text{PCA\_Temp}) = 2.47$ và $\text{VIF}(\text{PCA\_GHI}) = 2.07$, giải thích lần lượt $>91.5\%$ và $>88.2\%$ phương sai không gian.
+              </p>
+              <h4 class="font-bold text-slate-900 text-base">Đặc trưng Nhiệt động lực học HDD & CDD</h4>
+              <p>
+                Dựa trên ngưỡng tiện nghi ASHRAE $18.0^\circ\text{C}$:
+                $$\text{HDD}_t = \max\left(18.0 - \bar{T}_t, \, 0\right), \quad \text{CDD}_t = \max\left(\bar{T}_t - 18.0, \, 0\right)$$
+              </p>
+              <h4 class="font-bold text-slate-900 text-base">Định tuyến Ngữ cảnh Meta-Learner</h4>
+              <p>
+                Vector đầu vào meta-learner LightGBM:
+                $$\mathbf{z}_t = \left[ \hat{y}_{\text{enet}, t}^{\text{OOF}}, \; \hat{y}_{\text{xgb}, t}^{\text{OOF}}, \; \mathbf{x}_{\text{context}, t} \right]^T$$
+              </p>
+            </div>
+
+            <div class="border border-slate-200 rounded-xl overflow-hidden p-2 bg-slate-50">
+              <img src="output/figures/Figure_3_PCA_Components.png" alt="PCA Explained Variance" class="w-full h-auto rounded-lg shadow-sm">
+              <p class="text-xs text-center text-slate-500 mt-2 font-medium">Hình 3: Tỷ lệ phương sai tích lũy của PCA trên 5 trạm Nhiệt độ và 5 trạm GHI.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 5: Experiments & EDA -->
+        <section id="experiments" class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+          <div class="flex items-center space-x-2 border-b border-slate-100 pb-3">
+            <span class="h-6 w-1.5 bg-emerald-600 rounded-full"></span>
+            <h2 class="text-xl font-bold text-slate-900">5. Dữ liệu & Phân tích Khám phá (EDA)</h2>
+          </div>
+
+          <p class="text-slate-700 text-sm">
+            Tập dữ liệu PG&E 3 năm (2020--2022) gồm 26,304 giờ quan sát. Đồ thị phân tán giữa phụ tải và nhiệt độ thể hiện rõ nét quan hệ chữ U phi tuyến tính: phụ tải đạt cực tiểu quanh 18°C và tăng vọt khi nhiệt độ vượt 25°C.
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="border border-slate-200 rounded-xl p-2 bg-slate-50">
+              <img src="output/figures/Figure_1_Load_vs_Site5Temp_Year1.png" alt="Load vs Temp Year 1" class="w-full h-auto rounded-lg">
+              <p class="text-xs text-center text-slate-500 mt-2 font-medium">Hình 1: Quan hệ Phụ tải - Nhiệt độ Trạm 5 (Năm 1 / 2020)</p>
+            </div>
+            <div class="border border-slate-200 rounded-xl p-2 bg-slate-50">
+              <img src="output/figures/Figure_2_Load_vs_Site5Temp_Year2.png" alt="Load vs Temp Year 2" class="w-full h-auto rounded-lg">
+              <p class="text-xs text-center text-slate-500 mt-2 font-medium">Hình 2: Quan hệ Phụ tải - Nhiệt độ Trạm 5 (Năm 2 / 2021)</p>
+            </div>
+          </div>
+
+          <div class="border border-slate-200 rounded-xl p-2 bg-slate-50 max-w-2xl mx-auto">
+            <img src="output/figures/Figure_4_Weekdays_vs_Weekends.png" alt="Weekdays vs Weekends" class="w-full h-auto rounded-lg">
+            <p class="text-xs text-center text-slate-500 mt-2 font-medium">Hình 4: Phân phối Đồ thị Phụ tải Ngày làm việc vs Cuối tuần / Nghỉ lễ</p>
+          </div>
+        </section>
+
+        <!-- Section 6: Results & Master Benchmark -->
+        <section id="results" class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+          <div class="flex items-center space-x-2 border-b border-slate-100 pb-3">
+            <span class="h-6 w-1.5 bg-emerald-600 rounded-full"></span>
+            <h2 class="text-xl font-bold text-slate-900">6. Kết quả Thực nghiệm (Master Benchmark)</h2>
+          </div>
+
+          <!-- Master Table -->
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200 text-sm">
+              <thead class="bg-slate-50 text-slate-700 font-bold">
+                <tr>
+                  <th class="px-4 py-3 text-left">Cấu hình Mô hình</th>
+                  <th class="px-3 py-3 text-center">Số biến</th>
+                  <th class="px-3 py-3 text-center">R² &uarr;</th>
+                  <th class="px-3 py-3 text-center">RMSE (MW) &darr;</th>
+                  <th class="px-3 py-3 text-center">MAE (MW) &darr;</th>
+                  <th class="px-3 py-3 text-center">MAPE &darr;</th>
+                  <th class="px-4 py-3 text-right">Cải thiện vs Gốc</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 bg-white">
+                <tr class="hover:bg-slate-50">
+                  <td class="px-4 py-3 font-medium text-slate-900">1. Original Baseline (24-XGBoost, Lag1)</td>
+                  <td class="px-3 py-3 text-center text-slate-500">18</td>
+                  <td class="px-3 py-3 text-center">0.8734</td>
+                  <td class="px-3 py-3 text-center font-semibold">171.66</td>
+                  <td class="px-3 py-3 text-center">120.77</td>
+                  <td class="px-3 py-3 text-center">5.41%</td>
+                  <td class="px-4 py-3 text-right text-slate-400 italic">Baseline</td>
+                </tr>
+                <tr class="hover:bg-slate-50">
+                  <td class="px-4 py-3 font-medium text-slate-900">2. 24-XGBoost + Fourier Harmonics</td>
+                  <td class="px-3 py-3 text-center text-slate-500">22</td>
+                  <td class="px-3 py-3 text-center">0.8880</td>
+                  <td class="px-3 py-3 text-center font-semibold">161.41</td>
+                  <td class="px-3 py-3 text-center">115.02</td>
+                  <td class="px-3 py-3 text-center">5.14%</td>
+                  <td class="px-4 py-3 text-right text-emerald-600 font-semibold">&minus;10.25 MW</td>
+                </tr>
+                <tr class="hover:bg-slate-50">
+                  <td class="px-4 py-3 font-medium text-slate-900">3. 24-XGBoost + Fourier + HDD/CDD</td>
+                  <td class="px-3 py-3 text-center text-slate-500">24</td>
+                  <td class="px-3 py-3 text-center">0.8891</td>
+                  <td class="px-3 py-3 text-center font-semibold">160.65</td>
+                  <td class="px-3 py-3 text-center">114.74</td>
+                  <td class="px-3 py-3 text-center">5.14%</td>
+                  <td class="px-4 py-3 text-right text-emerald-600 font-semibold">&minus;11.01 MW</td>
+                </tr>
+                <tr class="hover:bg-slate-50">
+                  <td class="px-4 py-3 font-medium text-slate-900">4. Single-XGBoost Toàn cục (Gồm Hour)</td>
+                  <td class="px-3 py-3 text-center text-slate-500">19</td>
+                  <td class="px-3 py-3 text-center">0.8902</td>
+                  <td class="px-3 py-3 text-center font-semibold">159.88</td>
+                  <td class="px-3 py-3 text-center">116.12</td>
+                  <td class="px-3 py-3 text-center">5.21%</td>
+                  <td class="px-4 py-3 text-right text-emerald-600 font-semibold">&minus;11.78 MW</td>
+                </tr>
+                <tr class="bg-emerald-50/50 hover:bg-emerald-50">
+                  <td class="px-4 py-3 font-bold text-emerald-950">5. Proposed Context-Aware Stacking (Mặc định)</td>
+                  <td class="px-3 py-3 text-center text-emerald-900 font-semibold">24</td>
+                  <td class="px-3 py-3 text-center font-bold text-emerald-900">0.9046</td>
+                  <td class="px-3 py-3 text-center font-bold text-emerald-900">148.98</td>
+                  <td class="px-3 py-3 text-center font-bold text-emerald-900">106.98</td>
+                  <td class="px-3 py-3 text-center font-bold text-emerald-900">4.99%</td>
+                  <td class="px-4 py-3 text-right font-bold text-emerald-700">&minus;22.68 MW</td>
+                </tr>
+                <tr class="bg-emerald-100/60 hover:bg-emerald-100">
+                  <td class="px-4 py-3 font-black text-emerald-950">6. Proposed Context-Aware Stacking (Optuna-Tuned)</td>
+                  <td class="px-3 py-3 text-center text-emerald-900 font-bold">24</td>
+                  <td class="px-3 py-3 text-center font-black text-emerald-900">0.9136</td>
+                  <td class="px-3 py-3 text-center font-black text-emerald-900">141.81</td>
+                  <td class="px-3 py-3 text-center font-black text-emerald-900">101.40</td>
+                  <td class="px-3 py-3 text-center font-black text-emerald-900">4.75%</td>
+                  <td class="px-4 py-3 text-right font-black text-emerald-800">&minus;29.03 MW (&minus;17.0%)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Forecast Curves -->
+          <div class="space-y-4 pt-4">
+            <h3 class="text-base font-bold text-slate-900">Đường cong Dự báo Năm thứ 3 (Year 3 / 2022)</h3>
+            <div class="border border-slate-200 rounded-xl p-2 bg-slate-50">
+              <img src="output/figures/Figure_6_Final_Forecast.png" alt="Final Forecast Year 3" class="w-full h-auto rounded-lg">
+              <p class="text-xs text-center text-slate-500 mt-2 font-medium">Hình 6: So sánh Phụ tải Thực tế và Dự báo của Mô hình CAS trên toàn bộ 8,760 giờ Năm 2022.</p>
+            </div>
+            <div class="border border-slate-200 rounded-xl p-2 bg-slate-50">
+              <img src="output/figures/Figure_7_Final_Forecast_by_Month.png" alt="Monthly Forecast" class="w-full h-auto rounded-lg">
+              <p class="text-xs text-center text-slate-500 mt-2 font-medium">Hình 7: Phân rã Đường cong Phụ tải Dự báo so với Thực tế theo từng tháng trong Năm 2022.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 7: Ablation Study & Dual-Regime -->
+        <section id="ablation" class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+          <div class="flex items-center space-x-2 border-b border-slate-100 pb-3">
+            <span class="h-6 w-1.5 bg-emerald-600 rounded-full"></span>
+            <h2 class="text-xl font-bold text-slate-900">7. Ablation Study & Khám phá Dual-Regime</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+            <div class="space-y-3 text-slate-700 text-sm">
+              <h4 class="font-bold text-slate-900 text-base">Ma trận Tương quan Phần dư Sai số</h4>
+              <p>
+                Tương quan phần dư Pearson giữa ElasticNet và XGBoost chỉ đạt <strong>$r = 0.6131$</strong>. Mức độ độc lập cao này khẳng định hai mô hình mắc các sai số không đồng nhất, tạo điều kiện hoàn hảo để CAS kết hợp.
+              </p>
+            </div>
+            <div class="border border-slate-200 rounded-xl p-2 bg-slate-50 max-w-sm mx-auto">
+              <img src="output/figures/Figure_Residual_Correlation_Matrix.png" alt="Residual Correlation" class="w-full h-auto rounded-lg">
+              <p class="text-xs text-center text-slate-500 mt-1 font-medium">Hình 9: Ma trận Tương quan Phần dư (r=0.6131)</p>
+            </div>
+          </div>
+
+          <!-- Conditional Regimes Table -->
+          <div class="space-y-3 pt-4">
+            <h3 class="text-base font-bold text-slate-900">Phân rã Sai số RMSE (MW) theo 8 Chế độ Vận hành</h3>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-slate-200 text-xs sm:text-sm">
+                <thead class="bg-slate-50 text-slate-700 font-bold">
+                  <tr>
+                    <th class="px-3 py-2 text-left">Chế độ Vận hành</th>
+                    <th class="px-2 py-2 text-center">Số mẫu</th>
+                    <th class="px-2 py-2 text-center">ElasticNet</th>
+                    <th class="px-2 py-2 text-center">XGBoost</th>
+                    <th class="px-2 py-2 text-center">Mô hình tốt hơn</th>
+                    <th class="px-2 py-2 text-center">CAS Đề xuất</th>
+                    <th class="px-3 py-2 text-right">Lợi ích Ensemble</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 bg-white">
+                  <tr class="bg-blue-50/40">
+                    <td class="px-3 py-2 font-bold text-blue-900">Phụ tải nền ban đêm (00:00--06:00)</td>
+                    <td class="px-2 py-2 text-center">2,190</td>
+                    <td class="px-2 py-2 text-center font-bold text-blue-800">131.33</td>
+                    <td class="px-2 py-2 text-center text-slate-500">141.37</td>
+                    <td class="px-2 py-2 text-center font-semibold text-blue-700">ElasticNet</td>
+                    <td class="px-2 py-2 text-center font-black text-emerald-700">100.50</td>
+                    <td class="px-3 py-2 text-right font-black text-emerald-700">+30.83 MW</td>
+                  </tr>
+                  <tr class="bg-red-50/40">
+                    <td class="px-3 py-2 font-bold text-red-900">Sóng nhiệt mùa hè (CDD &gt; 3°C)</td>
+                    <td class="px-2 py-2 text-center">2,196</td>
+                    <td class="px-2 py-2 text-center text-slate-500">313.27</td>
+                    <td class="px-2 py-2 text-center font-bold text-red-800">244.16</td>
+                    <td class="px-2 py-2 text-center font-semibold text-red-700">XGBoost</td>
+                    <td class="px-2 py-2 text-center font-black text-emerald-700">215.44</td>
+                    <td class="px-3 py-2 text-right font-black text-emerald-700">+28.72 MW</td>
+                  </tr>
+                  <tr>
+                    <td class="px-3 py-2 font-medium">Cao điểm chiều tối (15:00--19:00)</td>
+                    <td class="px-2 py-2 text-center">1,825</td>
+                    <td class="px-2 py-2 text-center">243.48</td>
+                    <td class="px-2 py-2 text-center font-semibold">171.72</td>
+                    <td class="px-2 py-2 text-center">XGBoost</td>
+                    <td class="px-2 py-2 text-center font-bold text-emerald-700">163.45</td>
+                    <td class="px-3 py-2 text-right text-emerald-700 font-semibold">+8.27 MW</td>
+                  </tr>
+                  <tr>
+                    <td class="px-3 py-2 font-medium">Mùa đông sưởi ấm (HDD &gt; 5°C)</td>
+                    <td class="px-2 py-2 text-center">1,798</td>
+                    <td class="px-2 py-2 text-center">131.74</td>
+                    <td class="px-2 py-2 text-center font-semibold">100.14</td>
+                    <td class="px-2 py-2 text-center">XGBoost</td>
+                    <td class="px-2 py-2 text-center font-bold text-emerald-700">93.25</td>
+                    <td class="px-3 py-2 text-right text-emerald-700 font-semibold">+6.90 MW</td>
+                  </tr>
+                  <tr>
+                    <td class="px-3 py-2 font-medium">Giữa trưa bức xạ cao (10:00--14:00)</td>
+                    <td class="px-2 py-2 text-center">1,825</td>
+                    <td class="px-2 py-2 text-center">266.69</td>
+                    <td class="px-2 py-2 text-center font-semibold">205.26</td>
+                    <td class="px-2 py-2 text-center">XGBoost</td>
+                    <td class="px-2 py-2 text-center font-bold text-emerald-700">199.17</td>
+                    <td class="px-3 py-2 text-right text-emerald-700 font-semibold">+6.09 MW</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="border border-slate-200 rounded-xl p-2 bg-slate-50 mt-4">
+              <img src="output/figures/Figure_8_Conditional_Regime_Errors.png" alt="Conditional Regime Errors" class="w-full h-auto rounded-lg">
+              <p class="text-xs text-center text-slate-500 mt-2 font-medium">Hình 8: So sánh Sai số RMSE giữa ElasticNet, XGBoost và CAS theo 8 Chế độ Vận hành.</p>
+            </div>
+          </div>
+
+          <!-- SHAP Heatmap -->
+          <div class="space-y-3 pt-4">
+            <h3 class="text-base font-bold text-slate-900">Biểu đồ Nhiệt SHAP 24 Giờ (Động học Đặc trưng Nhật triều)</h3>
+            <div class="border border-slate-200 rounded-xl p-2 bg-slate-50">
+              <img src="output/figures/fig_shap_heatmap.png" alt="SHAP Heatmap" class="w-full h-auto rounded-lg">
+              <p class="text-xs text-center text-slate-500 mt-2 font-medium">Hình 10: Tầm quan trọng động học của các đặc trưng theo 24 giờ trong ngày.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 10: Replication Instructions -->
+        <section id="replication" class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-4">
+          <div class="flex items-center space-x-2 border-b border-slate-100 pb-3">
+            <span class="h-6 w-1.5 bg-emerald-600 rounded-full"></span>
+            <h2 class="text-xl font-bold text-slate-900">10. Hướng dẫn Tái lập Thực nghiệm (1-Click Command)</h2>
+          </div>
+
+          <div class="space-y-3">
+            <p class="text-slate-700 text-sm">1. Tải repository từ GitHub:</p>
+            <div class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto">
+git clone https://github.com/AIVIETNAM-AIO-MyNguyen/Module03_Debug-Team.git
+cd Module03_Debug-Team
+pip install -r requirements.txt
+            </div>
+
+            <p class="text-slate-700 text-sm pt-2">2. Tái lập kết quả baseline của bài báo gốc:</p>
+            <div class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto">
+python replication/run_replication.py
+            </div>
+
+            <p class="text-slate-700 text-sm pt-2">3. Chạy toàn bộ pipeline nghiên cứu mở rộng CAS:</p>
+            <div class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm font-mono overflow-x-auto">
+python run_extended_experiments.py
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 11: Conformal Prediction -->
+        <section id="conclusion" class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+          <div class="flex items-center space-x-2 border-b border-slate-100 pb-3">
+            <span class="h-6 w-1.5 bg-emerald-600 rounded-full"></span>
+            <h2 class="text-xl font-bold text-slate-900">11. Định lượng Độ Bất định (Conformal Prediction) & Kết luận</h2>
+          </div>
+
+          <p class="text-slate-700 text-sm">
+            Nhóm đã bước đầu tích hợp thành công thuật toán Conformal Prediction nhằm tạo ra các khoảng tin cậy khả tín 95% có bảo đảm thống kê không phụ thuộc phân phối:
+          </p>
+
+          <div class="border border-slate-200 rounded-xl p-2 bg-slate-50">
+            <img src="output/figures/fig_cp_intervals.png" alt="Conformal Prediction Intervals" class="w-full h-auto rounded-lg">
+            <p class="text-xs text-center text-slate-500 mt-2 font-medium">Hình 11: Khoảng Dự báo Tin cậy 95% bằng Conformal Prediction trên Chuỗi Phụ tải.</p>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 mt-16 py-8 text-center text-xs text-slate-500">
+    <p>AI VIET NAM (AI Conquer 2026) &bull; Research Track (Hướng Du học) &bull; <strong>Debug Team</strong></p>
+    <p class="mt-1">Pacific Gas & Electric Company (PG&E) Dataset &bull; arXiv:2505.11390 Replication & Extension</p>
+  </footer>
+
+</body>
+</html>
