@@ -1,3 +1,4 @@
+% !TEX root = ../main.tex
 \section{Phương pháp nghiên cứu (Methodology)}
 \label{sec:methodology}
 
@@ -5,15 +6,15 @@
 \subsection{Tổng quan Phương pháp (Methodology Overview)}
 \label{subsec:methodology_overview}
 
-Nghiên cứu này đặt ra bài toán dự báo phụ tải điện theo giờ (\textit{hourly electric load forecasting}) trên tập dữ liệu PG\&E gồm ba năm (2020--2022) với các biến ngoại sinh nhiệt độ và bức xạ mặt trời thu thập từ 5 trạm quan trắc địa lý. Chúng tôi đề xuất kiến trúc \textbf{Context-Aware Dual-Regime Stacking (CAS)}, một phương pháp ensemble hai tầng tích hợp tri thức vật lý nhằm khắc phục các hạn chế căn bản của mô hình cơ sở tuyến tính đơn lẻ trước đó.
+Bài toán đặt ra là dự báo phụ tải điện theo giờ (\textit{hourly electric load forecasting}) cho lưới điện PG\&E (2020--2022). Dữ liệu tích hợp nhiệt độ và bức xạ từ năm trạm quan trắc. Khắc phục nhược điểm của mô hình tuyến tính đơn lẻ, chúng tôi đề xuất \textbf{Context-Aware Dual-Regime Stacking (CAS)}---kiến trúc ensemble hai tầng tích hợp tri thức vật lý công trình.
 
-Chiến lược thực nghiệm được tổ chức thành bốn mô-đun liên hoàn, được minh họa tổng thể trong Hình~\ref{fig:methodology_architecture}: (i)~\textbf{Mô-đun~1} giải quyết đa cộng tuyến ngoại sinh bằng PCA; (ii)~\textbf{Mô-đun~2} bổ sung tri thức vật lý qua kỹ nghệ đặc trưng mới; (iii)~\textbf{Mô-đun~3} phân tích đa dạng sai số để biện minh cho kiến trúc ensemble kép; (iv)~\textbf{Mô-đun~4} xây dựng bộ định tuyến ngữ cảnh thích nghi CAS. Chiến lược đánh giá sử dụng ba giao thức độc lập: Year-1$\to$Year-2, Year-2$\to$Year-1, và Year-3 hold-out test.
+Toàn bộ quy trình gồm bốn mô-đun liên hoàn (Hình~\ref{fig:methodology_architecture}). \textbf{Mô-đun~1} giảm đa cộng tuyến bằng PCA, trong khi \textbf{Mô-đun~2} bổ sung đặc trưng vật lý và chu kỳ Fourier. Tiếp đó, \textbf{Mô-đun~3} phân tích tương quan phần dư, tạo tiền đề để \textbf{Mô-đun~4} thiết lập bộ định tuyến thích nghi CAS. Hiệu năng được kiểm chứng qua ba giao thức: Year-1$\to$Year-2, Year-2$\to$Year-1 và Year-3 hold-out.
 
 \begin{figure}[htbp]
     \centering
     \begin{tcolorbox}[colback=gray!5,colframe=aivnGreen,arc=3mm,boxrule=0.8pt,width=0.98\linewidth,title={\bfseries Sơ đồ Khung Kiến trúc Tổng thể: Context-Aware Stacking với Physics-Informed Features},fonttitle=\sffamily\bfseries]
     \centering
-    \small
+    \scriptsize
     \begin{verbatim}
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │                              DỮ LIỆU ĐẦU VÀO NGOẠI SINH                                │
@@ -61,7 +62,7 @@ Chiến lược thực nghiệm được tổ chức thành bốn mô-đun liên
 \subsection{Phương pháp Cơ sở (Baseline Method)}
 \label{subsec:baseline}
 
-Phương pháp cơ sở tham chiếu là kiến trúc \textbf{24-XGBoost} được đề xuất trong bài báo gốc~\cite{bunn2021individual}: huấn luyện 24 mô hình XGBoost độc lập, mỗi mô hình chuyên biệt cho một giờ trong ngày, trên tập đặc trưng gốc gồm $[\text{PCA\_Temp}, \text{PCA\_GHI}, \text{Is\_Weekend}, \text{Is\_Holiday}, \text{Month\_1}{\ldots}\text{Month\_{12}}, \text{PCA\_Temp\_Lag1}, \text{PCA\_GHI\_Lag1}]$ (18 đặc trưng). Phương pháp này phù hợp làm cơ sở vì: (1) gradient boosted trees đã được chứng minh hiệu quả trên dữ liệu phụ tải theo giờ; (2) cấu trúc giờ hóa (\textit{per-hour}) giúp nắm bắt phân bố phụ tải đặc trưng cho từng khoảng thời gian; (3) đây là đường cơ sở có kết quả công bố cho phép so sánh trực tiếp. Tham số gốc sử dụng \texttt{max\_depth=6}, \texttt{n\_estimators=200}, tối ưu bằng Optuna 50 trials theo TimeSeriesSplit. Vai trò của baseline là xác lập mức sai số tham chiếu để kiểm định liệu các cải tiến đề xuất có tạo ra cải thiện có ý nghĩa hay không.
+Nghiên cứu chọn kiến trúc \textbf{24-XGBoost} từ bài báo gốc~\cite{roy2025hourly} làm mốc tham chiếu. Kiến trúc này huấn luyện 24 mô hình chuyên biệt cho từng giờ dựa trên 18 đặc trưng khí tượng, lịch trình và độ trễ $[\text{PCA\_Temp}, \text{PCA\_GHI}, \text{Is\_Weekend}, \text{Is\_Holiday}, \text{Month\_1}{\ldots}\text{Month\_{12}}, \text{PCA\_Temp\_Lag1}, \text{PCA\_GHI\_Lag1}]$. Cấu trúc phân tách theo giờ giúp nắm bắt quy luật biến thiên phụ tải trong ngày, tạo đường cơ sở đã công bố để đối sánh trực tiếp. Cấu hình gốc dùng \texttt{max\_depth=6} và \texttt{n\_estimators=200}, tối ưu qua 50 lượt Optuna với TimeSeriesSplit. Đây là chuẩn đối sánh để định lượng mức cải thiện của CAS.
 
 %------------------------------------------------------------------------------
 \subsection{Phương pháp Đề xuất (Proposed Method)}
@@ -70,95 +71,93 @@ Phương pháp cơ sở tham chiếu là kiến trúc \textbf{24-XGBoost} đư�
 Phương pháp đề xuất là kiến trúc \textbf{Context-Aware Dual-Regime Stacking (CAS)}, một ensemble hai tầng gồm ba thành phần chính:
 
 \begin{enumerate}
-    \item \textbf{Mô hình cơ sở tuyến tính -- ElasticNet Regressor:} Học ánh xạ tuyến tính, đặc biệt hiệu quả ở vùng baseload ban đêm nơi quan hệ nhiệt độ--phụ tải là tuyến tính.
+    \item \textbf{Mô hình cơ sở tuyến tính (ElasticNet Regressor):} Mô hình học các quan hệ tuyến tính ổn định, chiếm ưu thế tại vùng phụ tải nền ban đêm.
     \begin{equation}
         \min_{\mathbf{w}, b} \frac{1}{2N} \sum_{t=1}^N \Big(y_t - \mathbf{w}^T \mathbf{x}_t - b\Big)^2 + \lambda \left[ \alpha \|\mathbf{w}\|_1 + \frac{1 - \alpha}{2} \|\mathbf{w}\|_2^2 \right]
     \end{equation}
-    với $\lambda = 0.1$, $\alpha = 0.5$. Nhờ dung hòa chuẩn $L_1$ (chọn lọc đặc trưng thưa) và $L_2$ (chống cộng tuyến), ElasticNet có phương sai ước lượng thấp, ổn định trước nhiễu.
+    Tham số thiết lập ở mức $\lambda = 0.1$ và $\alpha = 0.5$. Nhờ kết hợp chuẩn $L_1$ (chọn lọc đặc trưng thưa) và $L_2$ (chống cộng tuyến), ElasticNet triệt tiêu hiện tượng cộng tuyến, hạ thấp phương sai ước lượng trước nhiễu ngẫu nhiên.
 
-    \item \textbf{Mô hình cơ sở phi tuyến -- XGBoost Regressor:} Học các ngưỡng phi tuyến kích hoạt phụ tải nhiệt cực đoan khi $\text{CDD}_t > 3^\circ\text{C}$.
+    \item \textbf{Mô hình cơ sở phi tuyến (XGBoost Regressor):} Cấu trúc cây quyết định chịu trách nhiệm mô hình hóa các ngưỡng phi tuyến phức tạp khi nhiệt độ tăng vọt ($\text{CDD}_t > 3^\circ\text{C}$).
     \begin{equation}
         \hat{y}_t = \sum_{k=1}^K f_k(\mathbf{x}_t), \quad f_k \in \mathcal{T}
     \end{equation}
-    với \texttt{max\_depth=6}, \texttt{n\_estimators=200}.
+    Mô hình thiết lập \texttt{max\_depth=6} cùng \texttt{n\_estimators=200}.
 
-    \item \textbf{Meta-learner nhận biết ngữ cảnh -- LightGBM (CAS):} Nhận đồng thời dự báo của hai mô hình cơ sở \emph{và} toàn bộ vector ngữ cảnh để phân bổ trọng số động.
+    \item \textbf{Meta-learner nhận biết ngữ cảnh (LightGBM):} Tầng tổng hợp nhận đồng thời dự báo ngoại mẫu của hai mô hình cơ sở cùng vector ngữ cảnh môi trường để điều phối tỷ trọng thích ứng.
     \begin{equation}
         \mathbf{z}_t = \Big[ \hat{y}_{\text{enet}, t}^{\text{OOF}},\; \hat{y}_{\text{xgb}, t}^{\text{OOF}},\; \mathbf{x}_{\text{context}, t} \Big]^T \in \mathbb{R}^{2 + d_{\text{ctx}}}
     \end{equation}
 \end{enumerate}
 
-So với baseline 24-XGBoost, CAS khác biệt ở ba điểm: (a)~không phân tách cứng nhắc theo giờ mà học chế độ vận hành động từ ngữ cảnh; (b)~tận dụng tính bổ trợ của hai họ mô hình trái ngược về bias--variance; (c)~loại bỏ rò rỉ dữ liệu qua giao thức Out-Of-Fold với TimeSeriesSplit.
+Kiến trúc CAS tạo khác biệt căn bản so với baseline 24-XGBoost. Thay vì chia cắt tĩnh theo giờ, mô hình tự thích ứng theo chế độ vận hành thực tế thông qua ngữ cảnh. Sự kết hợp giữa hai họ giải thuật đối lập về bias--variance giúp triệt tiêu sai số cục bộ, trong khi giao thức Out-Of-Fold ngăn ngừa rò rỉ dữ liệu.
 
 %------------------------------------------------------------------------------
 \subsection{Các Cải tiến và Biến thể Phương pháp}
 \label{subsec:improvements}
 
-Chúng tôi thực hiện các cải tiến so với baseline theo hai hướng:
+Chúng tôi mở rộng phương pháp cơ sở theo hai hướng tiếp cận:
 
-\paragraph{Kỹ nghệ đặc trưng mới.}
+\paragraph{Kỹ nghệ đặc trưng định hướng vật lý.}
 \begin{itemize}
-    \item \textbf{Fourier Harmonics liên tục:} thay thế 12 biến giả tháng rời rạc bằng biểu diễn tuần hoàn trơn tru, tránh gián đoạn tại ranh giới tháng.
-    \item \textbf{Heating/Cooling Degree Days (HDD/CDD):} theo tiêu chuẩn ASHRAE~\cite{ashrae2021fundamentals}, mã hóa ngưỡng kích hoạt phi tuyến của điều hòa không khí.
+    \item \textbf{Fourier Harmonics liên tục:} Chuỗi hàm điều hòa thay thế 12 biến giả tháng rời rạc, bảo đảm tính trơn tru và loại bỏ bước nhảy tại ranh giới thời gian.
+    \item \textbf{Heating/Cooling Degree Days (HDD/CDD):} Dựa trên tiêu chuẩn ASHRAE~\cite{ashrae2021fundamentals}, hai chỉ số này phản ánh ngưỡng kích hoạt nhiệt phi tuyến của hệ thống điều hòa không khí.
 \end{itemize}
 
 \paragraph{Kiến trúc meta-learner có ngữ cảnh.}
-Stacking truyền thống~\cite{wolpert1992stacked} chỉ dùng dự báo base learner làm đầu vào meta-learner. Chúng tôi mở rộng vector đầu vào bằng toàn bộ ngữ cảnh vật lý--thời gian, cho phép meta-learner học quy tắc định tuyến thích nghi theo chế độ.
+Khác với stacking truyền thống~\cite{wolpert1992stacked} vốn chỉ dựa vào dự báo cơ sở, meta-learner của chúng tôi tiếp nhận toàn bộ vector ngữ cảnh vật lý và thời gian. Cơ chế này cho phép thuật toán tự học quy tắc định tuyến thích ứng theo chế độ vận hành.
 
 \paragraph{Ablation variants.}
-Bốn biến thể thực nghiệm được kiểm tra có hệ thống: (1)~24-XGBoost gốc, (2)~24-XGBoost + Fourier, (3)~24-XGBoost + Fourier + HDD/CDD, (4)~CAS đề xuất, nhằm tách biệt đóng góp của từng cải tiến.
-
+Bốn biến thể được kiểm tra có hệ thống nhằm bóc tách đóng góp độc lập: (1)~24-XGBoost gốc, (2)~24-XGBoost bổ sung Fourier, (3)~24-XGBoost tích hợp đồng thời Fourier và HDD/CDD, và (4)~kiến trúc CAS hoàn chỉnh.
 
 %------------------------------------------------------------------------------
 \subsection{Quy trình Xử lý Dữ liệu và Thực nghiệm}
 \label{subsec:pipeline}
 
-Quy trình hoàn chỉnh từ dữ liệu thô đến đầu ra cuối cùng được tổ chức theo thứ tự sau.
+Toàn bộ tiến trình thực nghiệm vận hành qua năm giai đoạn nối tiếp.
 
 \subsubsection{Đầu vào Dữ liệu (Data Input)}
-Dữ liệu đầu vào gồm hai tệp Excel: \texttt{Train.xlsx} (Year~1--2, 2020--2021) và \texttt{Test.xlsx} (Year~3, 2022). Mỗi bản ghi là một quan sát theo giờ với các biến: \texttt{Year}, \texttt{Month}, \texttt{Day}, \texttt{Hour}, 5 cột nhiệt độ trạm ($\texttt{Site-}i\texttt{ Temp}$, $i=1\ldots5$), 5 cột bức xạ GHI ($\texttt{Site-}i\texttt{ GHI}$), và biến mục tiêu phụ tải $\texttt{Load}$ (MW). Tổng số mẫu huấn luyện là $8{,}760 \times 2 = 17{,}520$ quan sát, tập kiểm tra gồm 8,760 quan sát (năm 2022).
+Dữ liệu nguồn phân bổ trong hai tệp: \texttt{Train.xlsx} (Year~1--2, 2020--2021) và \texttt{Test.xlsx} (Year~3, 2022). Mỗi bản ghi theo giờ lưu vết các trường thời gian, nhiệt độ và bức xạ GHI từ 5 trạm quan trắc, cùng chỉ số phụ tải mục tiêu $\texttt{Load}$ (MW). Tập huấn luyện gồm $8{,}760 \times 2 = 17{,}520$ quan sát, trong khi tập kiểm tra giữ $8{,}760$ mẫu (năm 2022).
 
 \subsubsection{Tiền xử lý Dữ liệu (Data Preprocessing)}
-Bước tiền xử lý thực hiện tuần tự:
+Bước tiền xử lý diễn ra theo trình tự:
 \begin{enumerate}
-    \item \textbf{Ánh xạ năm thực:} Biến $\texttt{Year} \in \{1, 2, 3\}$ được ánh xạ sang năm dương lịch $\{2020, 2021, 2022\}$ để tính chính xác ngày lễ và DOY.
-    \item \textbf{Đặc trưng lịch:} Sinh $\texttt{DayOfWeek}$, $\texttt{Is\_Weekend}$, $\texttt{Is\_Holiday}$ (đối chiếu 35 ngày lễ liên bang Hoa Kỳ 2020--2022), và 12 biến giả tháng $\texttt{Month\_1}\ldots\texttt{Month\_12}$.
-    \item \textbf{Giảm đa cộng tuyến bằng PCA:} Áp dụng PCA độc lập trên 5 cột nhiệt độ và 5 cột GHI, trích xuất thành phần chính thứ nhất $\texttt{PCA\_Temp}$ và $\texttt{PCA\_GHI}$ (chi tiết tại Mục~\ref{subsec:module1}).
-    \item \textbf{Xử lý giá trị thiếu từ lag/lead:} Bù bằng giá trị biên (\texttt{bfill} cho lag, \texttt{ffill} cho lead) để tránh mất mẫu.
+    \item \textbf{Ánh xạ thời gian thực:} Chuyển đổi mã $\texttt{Year} \in \{1, 2, 3\}$ về mốc dương lịch $\{2020, 2021, 2022\}$, bảo đảm tính toán chính xác ngày lễ và ngày trong năm (DOY).
+    \item \textbf{Đặc trưng lịch trình:} Khởi tạo $\texttt{DayOfWeek}$, $\texttt{Is\_Weekend}$, $\texttt{Is\_Holiday}$ (đối chiếu 35 ngày lễ liên bang Hoa Kỳ 2020--2022), kèm 12 biến giả tháng $\texttt{Month\_1}\ldots\texttt{Month\_12}$.
+    \item \textbf{Khử đa cộng tuyến bằng PCA:} Phân tích PCA độc lập trên 5 kênh nhiệt độ và 5 kênh bức xạ, trích xuất thành phần thứ nhất $\texttt{PCA\_Temp}$ và $\texttt{PCA\_GHI}$ (trình bày tại Mục~\ref{subsec:module1}).
+    \item \textbf{Xử lý giá trị biên:} Áp dụng bù suy biến (\texttt{bfill} cho biến trễ, \texttt{ffill} cho biến dẫn) để bảo toàn kích thước mẫu.
 \end{enumerate}
 
 \subsubsection{Xây dựng Đặc trưng (Feature Construction)}
 \label{subsubsec:feature_construction}
-Tập đặc trưng mở rộng 24 chiều được xây dựng từ ba nhóm:
+Không gian đặc trưng 24 chiều được cấu thành từ ba nhóm:
 \begin{itemize}
     \item \textbf{Nhóm 1 -- Đặc trưng gốc (18):} $[\texttt{PCA\_Temp}, \texttt{PCA\_GHI}, \texttt{Is\_Weekend}, \texttt{Is\_Holiday}, \texttt{Month\_1}\ldots\texttt{Month\_12}, \texttt{PCA\_Temp\_Lag1}, \texttt{PCA\_GHI\_Lag1}]$.
     \item \textbf{Nhóm 2 -- Fourier Harmonics (4):} $[\texttt{Sin\_Year}, \texttt{Cos\_Year}, \texttt{Sin\_Hour}, \texttt{Cos\_Hour}]$.
     \item \textbf{Nhóm 3 -- Degree Days vật lý (2):} $[\texttt{HDD}, \texttt{CDD}]$.
 \end{itemize}
-Chi tiết toán học của Nhóm~2 và Nhóm~3 được trình bày tại Mục~\ref{subsubsec:fourier} và~\ref{subsubsec:hdd_cdd}.
+Công thức toán học chi tiết của Nhóm~2 và Nhóm~3 được giải trình tại Mục~\ref{subsubsec:fourier} và~\ref{subsubsec:hdd_cdd}.
 
 \subsubsection{Xử lý Mô hình (Model Processing)}
 \label{subsubsec:model_processing}
-Đầu vào 24 chiều được xử lý qua ba tầng tuần tự trong CAS:
+Không gian 24 chiều được xử lý qua ba tầng nối tiếp:
 \begin{enumerate}
-    \item \textbf{Tầng base learner:} ElasticNet và XGBoost nhận $\mathbf{x}_t \in \mathbb{R}^{24}$ và sinh $\hat{y}_{\text{enet}, t}$, $\hat{y}_{\text{xgb}, t}$.
-    \item \textbf{Tầng OOF stacking:} Xây dựng $[\hat{y}_{\text{enet}, t}^{\text{OOF}}, \hat{y}_{\text{xgb}, t}^{\text{OOF}}, \mathbf{x}_{\text{context}, t}]^T$ theo TimeSeriesSplit 3-fold để loại bỏ rò rỉ dữ liệu.
-    \item \textbf{Tầng meta-learner:} LightGBM nhận vector hợp nhất và sinh dự báo cuối cùng $\hat{y}_{\text{CAS}, t}$.
+    \item \textbf{Tầng mô hình cơ sở:} ElasticNet và XGBoost tiếp nhận $\mathbf{x}_t \in \mathbb{R}^{24}$ để kết xuất lần lượt $\hat{y}_{\text{enet}, t}$ và $\hat{y}_{\text{xgb}, t}$.
+    \item \textbf{Tầng Out-Of-Fold:} Sinh tập ghép nối $[\hat{y}_{\text{enet}, t}^{\text{OOF}}, \hat{y}_{\text{xgb}, t}^{\text{OOF}}, \mathbf{x}_{\text{context}, t}]^T$ qua TimeSeriesSplit 3-fold nhằm cô lập triệt để nguy cơ rò rỉ thông tin.
+    \item \textbf{Tầng meta-learner:} LightGBM khai thác vector hợp nhất để đưa ra ước lượng hoàn chỉnh $\hat{y}_{\text{CAS}, t}$.
 \end{enumerate}
 
 \subsubsection{Sinh Đầu ra (Output Generation)}
-Đầu ra cuối cùng là chuỗi dự báo $\hat{y}_{\text{CAS}, t}$ (MW) cho toàn bộ Year-3 (8,760 điểm). Kết quả được xuất đồng thời ra Excel (\texttt{predictions\_xgboost.xlsx}) và CSV để phục vụ kiểm tra chéo.
+Kết quả trả về chuỗi dự báo phụ tải $\hat{y}_{\text{CAS}, t}$ cho 8,760 giờ thuộc Year-3. Dữ liệu được lưu trữ song song dưới định dạng Excel (\texttt{predictions\_xgboost.xlsx}) và CSV để thẩm định độc lập.
 
 %------------------------------------------------------------------------------
 \subsection{Mô-đun 1: Giảm Đa cộng tuyến Ngoại sinh bằng PCA}
 \label{subsec:module1}
-Bộ dữ liệu PG\&E cung cấp nhiệt độ và bức xạ mặt trời thu thập từ 5 trạm quan trắc địa lý trong cùng một vùng khí hậu. Mặc dù các vị trí địa lý có sự chênh lệch nhỏ về cao độ và khoảng cách tới bờ biển, các chuỗi dữ liệu này có mức độ đồng phụ thuộc cực kỳ cao.
 
-Để định lượng hiện tượng đa cộng tuyến, chúng tôi sử dụng chỉ số nhân tử phóng đại phương sai (\textit{Variance Inflation Factor} -- VIF) đối với từng biến $j$:
+Lưới điện PG\&E thu thập số liệu nhiệt độ và bức xạ mặt trời từ năm trạm quan trắc địa lý lân cận. Sự tương đồng khí hậu gây nên cộng tuyến gay gắt. Để định lượng hiện tượng này, chúng tôi tính toán chỉ số nhân tử phóng đại phương sai (\textit{Variance Inflation Factor}---VIF) cho từng biến độc lập $j$:
 \begin{equation}
     \text{VIF}_j = \frac{1}{1 - R_j^2}
 \end{equation}
-trong đó $R_j^2$ là hệ số xác định thu được khi hồi quy biến $j$ theo tất cả các biến độc lập còn lại trong tập dữ liệu. Theo quy chuẩn thống kê, khi $\text{VIF} > 5$ thì hiện tượng đa cộng tuyến bắt đầu xuất hiện, và khi $\text{VIF} > 10$ thì đa cộng tuyến đạt mức nghiêm trọng, làm sai lệch dấu của hệ số hồi quy và khiến phương sai ước lượng bùng nổ mất kiểm soát.
+Ở đây, $R_j^2$ phản ánh hệ số xác định từ hồi quy phụ của biến thứ $j$ theo các biến độc lập còn lại. Ngưỡng $\text{VIF} > 5$ cảnh báo đa cộng tuyến xuất hiện, trong khi mức vượt quá 10 gây bùng nổ phương sai ước lượng và làm đảo lộn dấu hệ số hồi quy.
 
 \begin{table}[htbp]
     \centering
@@ -178,7 +177,7 @@ trong đó $R_j^2$ là hệ số xác định thu được khi hồi quy biến 
     \end{tabular}
 \end{table}
 
-Bảng~\ref{tab:vif_comparison} trình bày kết quả phân tích VIF thực nghiệm. Trước khi xử lý, VIF của các trạm nhiệt độ dao động từ $17.08$ đến $52.70$, trong khi VIF của bức xạ GHI bùng nổ lên tới $1055.70$ ở Site-5. Chúng tôi áp dụng PCA độc lập trên 5 cột nhiệt độ và 5 cột GHI, trích xuất thành phần chính thứ nhất $\text{PCA\_Temp}$ và $\text{PCA\_GHI}$, giải thích lần lượt hơn $91.5\%$ và $88.2\%$ tổng phương sai không gian. Sau khi chiếu dữ liệu, VIF của $\text{PCA\_Temp}$ giảm ngoạn mục xuống \textbf{2.47} và $\text{PCA\_GHI}$ chỉ còn \textbf{2.07}, loại bỏ hoàn toàn nguy cơ bất ổn định số học (Hình~\ref{fig:pca_components}).
+Bảng~\ref{tab:vif_comparison} phơi bày mức độ đa cộng tuyến nghiêm trọng. Chỉ số VIF trạm nhiệt độ chạm ngưỡng 52.70, còn trạm bức xạ Site-5 bùng nổ tới 1055.70. Giải pháp phân tích thành phần chính (PCA) độc lập cho phép trích xuất hai đại diện $\text{PCA\_Temp}$ và $\text{PCA\_GHI}$, nắm giữ tương ứng hơn 91.5\% và 88.2\% phương sai không gian. Sau phép chiếu, VIF tụt giảm xuống \textbf{2.47} và \textbf{2.07}, triệt tiêu hoàn toàn bất ổn định số học (Hình~\ref{fig:pca_components}).
 
 \begin{figure}[htbp]
     \centering
@@ -187,105 +186,109 @@ Bảng~\ref{tab:vif_comparison} trình bày kết quả phân tích VIF thực n
     \label{fig:pca_components}
 \end{figure}
 
-
 %------------------------------------------------------------------------------
 \subsection{Mô-đun 2: Kỹ nghệ Đặc trưng Định hướng Vật lý (Physics-Informed Features)}
 \label{subsec:module2}
-Kế thừa từ bài báo gốc, mô hình giữ lại các biến trễ động học $\text{PCA\_Temp\_Lag1}$ và $\text{PCA\_GHI\_Lag1}$. Tuy nhiên, nhằm bổ sung tri thức vật lý công trình, chúng tôi phát triển hai nhóm đặc trưng mới:
+
+Mô hình kế thừa các biến trễ động học $\text{PCA\_Temp\_Lag1}$ và $\text{PCA\_GHI\_Lag1}$ từ thiết kế ban đầu. Để làm giàu tri thức nhiệt động học công trình, chúng tôi phát triển hai nhóm đặc trưng mới:
 
 \subsubsection{Chỉ số Degree Days Nhiệt động lực học (Heating \& Cooling Degree Days)}
 \label{subsubsec:hdd_cdd}
-Theo nguyên lý truyền nhiệt công trình và tiêu chuẩn ASHRAE~\cite{ashrae2021fundamentals}, lượng nhiệt trao đổi qua vỏ bao che công trình tỷ lệ thuận với độ lệch giữa nhiệt độ ngoài trời và nhiệt độ tiện nghi cơ sở $T_{\text{base}} = 18.0^\circ\text{C}$. Chúng tôi định nghĩa:
+
+Tiêu chuẩn ASHRAE~\cite{ashrae2021fundamentals} chỉ rõ tốc độ truyền nhiệt qua vỏ công trình tỷ lệ thuận với độ lệch nhiệt độ so với mốc tiện nghi $T_{\text{base}} = 18.0^\circ\text{C}$. Chỉ số Degree Days được hình thức hóa:
 \begin{align}
     \bar{T}_t &= \frac{1}{5} \sum_{i=1}^5 T_{i, t} \\
     \text{HDD}_t &= \max\left(18.0 - \bar{T}_t, \; 0\right) \\
     \text{CDD}_t &= \max\left(\bar{T}_t - 18.0, \; 0\right)
 \end{align}
-Hàm toán học $\max(0, \cdot)$ đưa vào tính chất ngưỡng phi tuyến ngắt quãng (\textit{piecewise linear / rectifier}): khi thời tiết mát mẻ quanh $18^\circ\text{C}$, cả hai chỉ số bằng 0; khi nhiệt độ tăng vọt trong mùa hè, $\text{CDD}_t$ tăng tỷ lệ thuận và kích hoạt các phản hồi phi tuyến tính của mô hình cây, giúp nắm bắt chính xác các đợt tăng vọt phụ tải do điều hòa không khí.
+Toán tử $\max(0, \cdot)$ tạo nên đặc tính ngưỡng ngắt khúc (\textit{piecewise linear / rectifier}). Trong vùng nhiệt độ ôn hòa quanh $18^\circ\text{C}$, cả hai chỉ số duy trì mức 0, giữ trạng thái phụ tải ở chế độ tuyến tính nền. Ngược lại, khi nhiệt độ tăng vọt, $\text{CDD}_t$ kích hoạt phản hồi phi tuyến của mô hình cây trước tải điều hòa không khí.
 
 \subsubsection{Chuỗi Điều hòa Fourier Liên tục (Continuous Fourier Harmonics)}
 \label{subsubsec:fourier}
-Để khắc phục nhược điểm gián đoạn của 12 biến giả tháng rời rạc, chúng tôi mô hình hóa chu kỳ nhật triều và chu kỳ năm thiên văn thông qua chuỗi điều hòa Fourier:
+
+Biến giả tháng rời rạc thường gây bước nhảy nhân tạo tại ranh giới thời gian. Chúng tôi giải quyết hạn chế này bằng chuỗi hàm điều hòa Fourier cho chu kỳ ngày và năm:
 \begin{align}
     \text{Sin\_Year}_t &= \sin\left(\frac{2\pi \cdot \text{DOY}_t}{365.25}\right), \quad \text{Cos\_Year}_t = \cos\left(\frac{2\pi \cdot \text{DOY}_t}{365.25}\right) \\
     \text{Sin\_Hour}_t &= \sin\left(\frac{2\pi \cdot \text{Hour}_t}{24.0}\right), \quad \text{Cos\_Hour}_t = \cos\left(\frac{2\pi \cdot \text{Hour}_t}{24.0}\right)
 \end{align}
-trong đó $\text{DOY}_t \in [1, 366]$ là ngày thứ bao nhiêu trong năm (tính theo dương lịch thực tế có nhuận). Cặp hàm sóng này đảm bảo tính trơn tru liên tục tại thời khắc chuyển giao năm mới và cung cấp cơ sở toán học tuần hoàn chặt chẽ.
+Biến $\text{DOY}_t \in [1, 366]$ xác định ngày trong năm theo dương lịch có tính năm nhuận. Các hàm sóng lượng giác bảo toàn tính tuần hoàn trơn tru trên toàn bộ chuỗi thời gian.
 
 %------------------------------------------------------------------------------
 \subsection{Mô-đun 3: Phân tích Đa dạng Sai số và Chế độ Vận hành Kép (Dual-Regime Discovery)}
 \label{subsec:module3}
-Để chuẩn bị cho kiến trúc ensemble, chúng tôi lựa chọn hai mô hình cơ sở đại diện cho hai trường phái học máy hoàn toàn đối lập:
+
+Kiến trúc ensemble kết hợp hai mô hình đại diện cho hai trường phái đối lập:
 \begin{enumerate}
-    \item \textbf{ElasticNet Regressor (Mô hình Tuyến tính với L1/L2 Regularization):}
+    \item \textbf{ElasticNet Regressor (Tuyến tính với Regularization):}
     \begin{equation}
         \min_{\mathbf{w}, b} \frac{1}{2N} \sum_{t=1}^N \Big(y_t - \mathbf{w}^T \mathbf{x}_t - b\Big)^2 + \lambda \left[ \alpha \|\mathbf{w}\|_1 + \frac{1 - \alpha}{2} \|\mathbf{w}\|_2^2 \right]
     \end{equation}
-    với $\lambda = 0.1, \alpha = 0.5$. Nhờ việc dung hòa giữa chuẩn $L_1$ (chọn lọc đặc trưng thưa) và chuẩn $L_2$ (co cụm hệ số chống cộng tuyến), ElasticNet sở hữu phương sai ước lượng cực thấp, rất ổn định trước nhiễu.
-    \item \textbf{XGBoost Regressor (Mô hình Gradient Boosted Trees):}
+    Thiết lập với $\lambda = 0.1, \alpha = 0.5$. Sự phối hợp giữa chuẩn $L_1$ và $L_2$ giúp mô hình triệt tiêu cộng tuyến, duy trì phương sai ước lượng thấp và khả năng chống nhiễu ổn định.
+
+    \item \textbf{XGBoost Regressor (Gradient Boosted Trees):}
     \begin{equation}
         \hat{y}_t = \sum_{k=1}^K f_k(\mathbf{x}_t), \quad f_k \in \mathcal{T}
     \end{equation}
-    Mô hình cây có tham số cấu hình $\text{max\_depth} = 6$ và $200$ cây quyết định ($\text{n\_estimators} = 200$), xuất sắc trong việc phân tách các không gian phụ tải cực đoan.
+    Mô hình cấu hình 200 cây quyết định với độ sâu tối đa 6 (\texttt{max\_depth=6}, \texttt{n\_estimators=200}), chuyên biệt trong việc phân tách các vùng phụ tải cực đoan.
 \end{enumerate}
 
-Gọi phần dư sai số (\textit{residuals}) dự báo trên tập kiểm tra của hai mô hình là:
+Chuỗi phần dư sai số (\textit{residuals}) trên tập kiểm tra được xác định:
 \begin{equation}
     e_{\text{enet}, t} = y_t - \hat{y}_{\text{enet}, t}, \quad e_{\text{xgb}, t} = y_t - \hat{y}_{\text{xgb}, t}
 \end{equation}
-Hệ số tương quan Pearson giữa hai chuỗi phần dư:
+Mức độ tương quan Pearson giữa hai chuỗi phần dư:
 \begin{equation}
     r = \frac{\sum_{t=1}^N (e_{\text{enet}, t} - \bar{e}_{\text{enet}})(e_{\text{xgb}, t} - \bar{e}_{\text{xgb}})}{\sqrt{\sum_{t=1}^N (e_{\text{enet}, t} - \bar{e}_{\text{enet}})^2} \sqrt{\sum_{t=1}^N (e_{\text{xgb}, t} - \bar{e}_{\text{xgb}})^2}}
 \end{equation}
-Giá trị thực nghiệm đạt được là \textbf{$r = 0.6131$}. Mức tương quan trung bình này chứng minh rằng phần dư sai số của hai mô hình có mức độ trực giao và bù trừ tương hỗ rất cao, là điều kiện tiên quyết hoàn hảo để xây dựng mô hình ensemble.
+Kết quả thực nghiệm ghi nhận \textbf{$r = 0.6131$}. Mức tương quan vừa phải này khẳng định sai số giữa hai mô hình có độ trực giao cao, tạo nền tảng lý tưởng cho cơ chế bù trừ ensemble.
 
 %------------------------------------------------------------------------------
 \subsection{Mô-đun 4: Kiến trúc Context-Aware Stacking (CAS)}
 \label{subsec:module4}
-Trong phương pháp Stacking truyền thống của Wolpert~\cite{wolpert1992stacked}, mô hình meta-learner chỉ nhận đầu vào là các giá trị dự báo:
+
+Stacking cổ điển của Wolpert~\cite{wolpert1992stacked} chỉ cung cấp các giá trị dự báo cơ sở cho tầng meta-learner:
 \begin{equation}
     \hat{y}_{\text{traditional}} = g\big(\hat{y}_{\text{enet}}, \hat{y}_{\text{xgb}}\big)
 \end{equation}
-Mô hình meta-learner tĩnh này hoàn toàn thiếu thông tin bối cảnh môi trường bên ngoài, không thể phân biệt được thời điểm hiện tại đang là giữa trưa nắng gắt hay nửa đêm tĩnh lặng.
+Cơ chế tĩnh này cô lập thông tin môi trường. Mô hình không thể nhận biết các chuyển biến thời tiết hay thời điểm tiêu thụ điện trong ngày.
 
-Để khắc phục nhược điểm này, chúng tôi đề xuất kiến trúc \textbf{Context-Aware Stacking (CAS)}. Đầu vào của meta-learner LightGBM được mở rộng thành một vector hợp nhất:
+Kiến trúc \textbf{Context-Aware Stacking (CAS)} giải quyết triệt để rào cản trên. Không gian đầu vào của LightGBM được mở rộng thành vector ghép nối đa tầng:
 \begin{equation}
     \mathbf{z}_t = \Big[ \hat{y}_{\text{enet}, t}^{\text{OOF}}, \; \hat{y}_{\text{xgb}, t}^{\text{OOF}}, \; \mathbf{x}_{\text{context}, t} \Big]^T \in \mathbb{R}^{2 + d_{\text{ctx}}}
 \end{equation}
-trong đó $\mathbf{x}_{\text{context}, t}$ bao gồm toàn bộ vector ngữ cảnh khí tượng và thời gian thực: $[\text{Hour}_t, \text{HDD}_t, \text{CDD}_t, \text{Sin\_Year}_t, \text{Cos\_Year}_t, \text{PCA\_Temp}_t, \text{PCA\_GHI}_t, \dots]$.
+Vector ngữ cảnh $\mathbf{x}_{\text{context}, t}$ tập hợp toàn diện các chỉ số thời gian và khí quyển: $[\text{Hour}_t, \text{HDD}_t, \text{CDD}_t, \text{Sin\_Year}_t, \text{Cos\_Year}_t, \text{PCA\_Temp}_t, \text{PCA\_GHI}_t, \dots]$.
 
-Để triệt tiêu hoàn toàn rủi ro rò rỉ dữ liệu (\textit{data leakage}), vector dự báo của các mô hình cơ sở trong tập huấn luyện được sinh ra thông qua giao thức kiểm chứng \textit{Out-Of-Fold} (OOF) với kỹ thuật chia tách chuỗi thời gian (\textit{TimeSeriesSplit}) gồm 3 folds. Mô hình meta-learner LightGBM được tối ưu hóa siêu tham số tự động bằng thư viện Optuna~\cite{akiba2019optuna} nhằm giảm thiểu RMSE trên các nếp gấp kiểm chứng chéo. Không gian tìm kiếm bao gồm: \texttt{n\_estimators} $\in [50, 250]$, \texttt{max\_depth} $\in [2, 6]$, \texttt{learning\_rate} $\in [0.01, 0.2]$ (log-scale), \texttt{num\_leaves} $\in [7, 31]$. Thông qua kiến trúc này, meta-learner hoạt động như một bộ định tuyến thích nghi động (\textit{adaptive dynamic router}): nó tự động phân bổ trọng số lớn cho ElasticNet khi lưới điện ở vùng phụ tải nền baseload ban đêm, và chuyển dịch trọng số quyết định sang XGBoost khi các ngưỡng nhiệt độ cực đoan kích hoạt phụ tải đỉnh mùa hè.
-
+Nguy cơ rò rỉ dữ liệu bị loại trừ nhờ giao thức Out-Of-Fold (OOF) tích hợp TimeSeriesSplit 3-fold. Siêu tham số của LightGBM được dò tìm tự động bằng Optuna~\cite{akiba2019optuna} nhằm tối thiểu hóa RMSE kiểm chứng chéo trên không gian tìm kiếm: \texttt{n\_estimators} $\in [50, 250]$, \texttt{max\_depth} $\in [2, 6]$, \texttt{learning\_rate} $\in [0.01, 0.2]$ (log-scale) và \texttt{num\_leaves} $\in [7, 31]$. Meta-learner vận hành như một bộ định tuyến thích nghi động. Thuật toán tự động ưu tiên ElasticNet ở vùng phụ tải nền ban đêm, đồng thời chuyển giao quyết định cho XGBoost khi nhiệt độ kích hoạt phụ tải đỉnh mùa hè.
 
 %------------------------------------------------------------------------------
 \subsection{Chiến lược Huấn luyện và Tối ưu hóa}
 \label{subsec:training}
 
 \paragraph{Phân tách dữ liệu.}
-Nghiên cứu sử dụng ba giao thức đánh giá độc lập để đảm bảo tính tổng quát:
+Ba giao thức phân tách độc lập bảo đảm độ tin cậy và tính tổng quát:
 \begin{itemize}
-    \item \textbf{Year-1 $\to$ Year-2:} Huấn luyện trên Year~1 (2020), kiểm tra trên Year~2 (2021).
-    \item \textbf{Year-2 $\to$ Year-1:} Huấn luyện trên Year~2 (2021), kiểm tra trên Year~1 (2020).
-    \item \textbf{Year-3 Hold-out (giao thức chính):} Huấn luyện trên Year~1+2, kiểm tra trên Year~3 (2022) -- tập kiểm tra hoàn toàn ẩn.
+    \item \textbf{Year-1 $\to$ Year-2:} Huấn luyện trên Year~1 (2020), kiểm tra tại Year~2 (2021).
+    \item \textbf{Year-2 $\to$ Year-1:} Huấn luyện trên Year~2 (2021), kiểm tra tại Year~1 (2020).
+    \item \textbf{Year-3 Hold-out (giao thức chính):} Huấn luyện trên Year~1+2, thẩm định tại Year~3 (2022)---tập kiểm tra hoàn toàn độc lập.
 \end{itemize}
 
 \paragraph{Mô hình cơ sở.}
-ElasticNet tối ưu bằng coordinate descent với \texttt{max\_iter=2000}, $\alpha=0.1$, \texttt{l1\_ratio=0.5}. XGBoost sử dụng \texttt{n\_estimators=200} và \texttt{max\_depth=6}, không áp dụng early stopping. Cả hai mô hình cơ sở được huấn luyện lại trên toàn bộ tập huấn luyện sau bước OOF.
+Thuật toán coordinate descent tối ưu bài toán ElasticNet (\texttt{max\_iter=2000}, $\alpha=0.1$, \texttt{l1\_ratio=0.5}). Cấu hình XGBoost ấn định \texttt{n\_estimators=200} và \texttt{max\_depth=6}, không kích hoạt early stopping. Cả hai mô hình cơ sở được tái huấn luyện trên toàn bộ tập huấn luyện sau bước OOF.
 
 \paragraph{Meta-learner (LightGBM).}
-Siêu tham số được tối ưu qua Optuna với 15 trials, mục tiêu tối thiểu hóa RMSE trung bình trên 3-fold KFold cross-validation của tập meta-training. Nếu bỏ qua bước tuning, các siêu tham số mặc định bảo thủ được dùng: \texttt{n\_estimators=100}, \texttt{max\_depth=3}, \texttt{learning\_rate=0.05}, \texttt{num\_leaves=15}.
+Quy trình Optuna gồm 15 trials tối thiểu hóa RMSE trung bình qua 3-fold KFold cross-validation trên tập meta-training. Khi bỏ qua bước tuning, hệ thống sử dụng cấu hình mặc định: \texttt{n\_estimators=100}, \texttt{max\_depth=3}, \texttt{learning\_rate=0.05} và \texttt{num\_leaves=15}.
 
 \paragraph{Hàm mất mát.}
-Tất cả các mô hình tối thiểu hóa MSE (tương đương RMSE) trên tập kiểm chứng. Không áp dụng regularization bên ngoài các tham số built-in của từng mô hình.
+Hàm tổn thất quy chuẩn cho toàn bộ mô hình là sai số toàn phương trung bình (MSE). Hệ thống không áp dụng thêm ràng buộc điều chuẩn ngoài các tham số nội tại của từng mô hình.
 
 %------------------------------------------------------------------------------
 \subsection{Quy trình Đánh giá}
 \label{subsec:evaluation}
 
-Phương pháp cơ sở và phương pháp đề xuất được so sánh trên cùng tập dữ liệu với các điều kiện thực nghiệm đồng nhất: cùng tập đặc trưng gốc cho baseline, cùng random seed~42 cho tất cả mô hình, cùng giao thức phân tách.
+Điều kiện thực nghiệm được chuẩn hóa nghiêm ngặt. Các mô hình chia sẻ chung tập dữ liệu, seed ngẫu nhiên 42 và giao thức phân tách để bảo đảm tính công bằng.
 
 \paragraph{Chỉ số đánh giá.}
-Năm chỉ số được báo cáo đồng thời:
+Năm chỉ số định lượng hiệu năng được báo cáo đồng thời:
 \begin{align}
     \text{RMSE} &= \sqrt{\frac{1}{N}\sum_{t=1}^N (y_t - \hat{y}_t)^2} \\
     \text{MAE} &= \frac{1}{N}\sum_{t=1}^N |y_t - \hat{y}_t| \\
@@ -295,18 +298,18 @@ Năm chỉ số được báo cáo đồng thời:
 \end{align}
 
 \paragraph{Phân tích chế độ điều kiện.}
-Ngoài đánh giá toàn cục, chúng tôi thực hiện phân tách sai số theo 8 chế độ vận hành có điều kiện: (1)~Sóng nhiệt ($\text{CDD} > 3^\circ\text{C}$), (2)~Mùa đông ($\text{HDD} > 5^\circ\text{C}$), (3)~Thời tiết ôn hòa ($\text{HDD} \leq 1 \wedge \text{CDD} \leq 1$), (4)~Giờ đỉnh (15:00--19:00), (5)~Giờ đêm (00:00--06:00), (6)~Giờ trưa mặt trời (10:00--14:00), (7)~Ngày trong tuần, (8)~Cuối tuần và ngày lễ. Phân tích này cho phép định lượng chính xác lợi thế của CAS trong từng bối cảnh vật lý và thời gian.
+Đánh giá toàn cục được bổ trợ bằng phân tích theo 8 chế độ vận hành: (1)~Sóng nhiệt ($\text{CDD} > 3^\circ\text{C}$), (2)~Mùa đông ($\text{HDD} > 5^\circ\text{C}$), (3)~Thời tiết ôn hòa ($\text{HDD} \leq 1 \wedge \text{CDD} \leq 1$), (4)~Giờ cao điểm (15:00--19:00), (5)~Giờ ban đêm (00:00--06:00), (6)~Giờ trưa mặt trời (10:00--14:00), (7)~Ngày trong tuần, và (8)~Cuối tuần hoặc ngày lễ. Cách tiếp cận này đo lường tường minh ưu thế định tuyến của CAS trong từng bối cảnh vật lý và thời gian.
 
 %------------------------------------------------------------------------------
 \subsection{Cơ sở Lý luận Lựa chọn Phương pháp}
 \label{subsec:rationale}
 
 \paragraph{Phù hợp với đặc tính dữ liệu.}
-Phụ tải điện theo giờ là chuỗi thời gian phi tuyến, đa chế độ, với các đột biến nhiệt cực đoan không thể nắm bắt bằng mô hình tuyến tính đơn lẻ. Đặc tính đa trạm quan trắc của PG\&E tạo ra đa cộng tuyến nghiêm trọng (VIF lên đến 1055) đòi hỏi tiền xử lý PCA bắt buộc. Tri thức vật lý HVAC (HDD/CDD) cung cấp tín hiệu nhân quả rõ ràng mà mô hình học máy thuần túy không thể suy diễn tự động từ đặc trưng lịch đơn thuần.
+Phụ tải điện theo giờ thể hiện động học phi tuyến đa chế độ. Sự phụ thuộc mạnh giữa các trạm đo PG\&E đẩy chỉ số VIF lên 1055, biến phép chiếu PCA thành yêu cầu bắt buộc. Bên cạnh đó, các biến số nhiệt động học HDD và CDD cung cấp quan hệ nhân quả vật lý mà các biến lịch trình đơn thuần không thể tự suy diễn.
 
 \paragraph{Phù hợp với mục tiêu nghiên cứu.}
-Mục tiêu kép là cải thiện độ chính xác dự báo đồng thời duy trì khả năng giải thích. CAS đáp ứng cả hai: meta-learner LightGBM cung cấp SHAP values để giải thích cơ chế định tuyến; ElasticNet cung cấp hệ số hồi quy tuyến tính giải thích được; XGBoost phân tách các chế độ nhiệt phi tuyến.
+Nghiên cứu hướng đến mục tiêu kép: độ chính xác cao và khả năng giải thích rõ ràng. ElasticNet cung cấp hệ số hồi quy trực quan, trong khi XGBoost xử lý các vùng phản ứng nhiệt phi tuyến. LightGBM ở tầng trên cùng mở đường cho việc phân tích cơ chế định tuyến thông qua giá trị SHAP.
 
 \paragraph{Lợi thế so với các phương pháp hiện có.}
-Phương pháp ensemble hai tầng tích hợp ngữ cảnh vật lý khắc phục hai hạn chế chính của các phương pháp tiền nhiệm: (a)~meta-learner tĩnh không nhận biết bối cảnh thời gian trong ngày và mùa; (b)~đặc trưng calendar rời rạc gây gián đoạn biểu diễn theo mùa tại ranh giới tháng. Chi phí tính toán của CAS tương đương baseline: meta-learner nhẹ (LightGBM, 100--250 cây) và toàn bộ pipeline chạy trên CPU thông thường trong khoảng vài phút cho dữ liệu 17,520 quan sát.
+Mô hình CAS hóa giải hai hạn chế cốt lõi của các giải pháp trước. Thứ nhất, kiến trúc khắc phục tình trạng thiếu nhận thức bối cảnh của meta-learner tĩnh; thứ hai, chuỗi sóng Fourier loại bỏ gián đoạn chu kỳ do biến tháng rời rạc. Chi phí tính toán giữ ở mức tối ưu: cấu trúc cây gọn nhẹ cho phép huấn luyện hoàn tất sau vài phút trên CPU tiêu chuẩn với tập dữ liệu 17,520 quan sát.
 
