@@ -3,8 +3,8 @@
 
 \title{%
     \centering
-    \Large {AI VIET NAM -- AI Conquer 2026 -- Module 01}\\[.5ex]  
-    \Huge \textbf{Báo cáo kỹ thuật}\\[.5ex]
+    \Large {AI VIET NAM -- AI Conquer 2026 -- Module 03}\\[.5ex]  
+    \Huge \textbf{Dự Báo Phụ Tải Điện Theo Giờ Dựa Trên Mô Hình Xếp Chồng Thích Ứng Ngữ Cảnh Và Kỹ Thuật Đặc Trưng Vật Lý}\\[.5ex]
 }
 
 \author{
@@ -27,13 +27,18 @@
 \renewcommand{\headrulewidth}{1.0pt}
 \renewcommand{\headrule}{{\color{aivnGreen}\hrule width\headwidth height\headrulewidth \vskip-\headrulewidth}}
 
+% Định dạng đánh số Section theo chữ số La Mã (I, II, III, ...) chuẩn template AI Vietnam
+\renewcommand{\thesection}{\Roman{section}}
+\titleformat{\section}{\normalfont\Huge\bfseries}{\thesection.}{0.8em}{}
+\titleformat{\subsection}{\normalfont\Large\bfseries}{}{0pt}{}
+
 \begin{document}
 \maketitle
-%
+
 \addvspace{-2.5em}
 \setlength{\epigraphwidth}{0.6\textwidth}
 
-\input{sections/01_abstraction}
+\input{sections/01_abstract}
 
 \newpage
 \setcounter{tocdepth}{2}
@@ -42,16 +47,21 @@
 
 \newpage
 \input{sections/02_introduction}
-\input{sections/03_research_problem}
-\input{sections/04_related_work}
-\input{sections/05_methodology}
-\input{sections/06_experiments}
-\input{sections/07_results}
-\input{sections/08_ablation_study}
-\input{sections/09_discussion}
-\input{sections/10_limitations}
-\input{sections/11_replicate_result}
-\input{sections/12_future_work}
+
+\vspace{1em}
+\input{sections/03_related_work}
+
+\vspace{1em}
+\input{sections/04_methodology}
+
+\vspace{1em}
+\input{sections/05_experiments}
+
+\vspace{1em}
+\input{sections/06_results_and_discussion}
+
+\vspace{1em}
+\input{sections/07_conclusion_and_future_work}
 
 \newpage
 \section{Tài liệu tham khảo}
@@ -60,4 +70,8 @@
 \begin{otherlanguage}{english}
 \printbibliography[heading=none, title={}]
 \end{otherlanguage}
+
+\newpage
+\input{sections/08_appendix}
+
 \end{document}
