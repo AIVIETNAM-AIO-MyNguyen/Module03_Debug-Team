@@ -1,0 +1,46 @@
+\section{Nghiên cứu liên quan}
+\label{sec:related_work}
+
+Dự báo phụ tải điện có bề dày lịch sử phát triển lâu dài với bốn trường phái công nghệ chính, mỗi trường phái sở hữu các thiên kiến quy nạp (\textit{inductive bias}) và giới hạn ứng dụng riêng biệt:
+
+\subsection{Các Mô hình Thống kê và Kinh tế lượng Cổ điển}
+Các phương pháp thống kê cổ điển bao gồm mô hình tự hồi quy tích hợp trung bình trượt (\textit{Autoregressive Integrated Moving Average} -- ARIMA), SARIMAX tích hợp biến ngoại sinh, và các mô hình san bằng mũ Holt-Winters~\cite{hyndman2018forecasting}. Ưu điểm nổi bật của nhóm mô hình này là cấu trúc toán học chặt chẽ, khả năng diễn giải mối quan hệ nhân quả tường minh và chi phí tính toán cực thấp. Tuy nhiên, hạn chế cố hữu là giả định nghiêm ngặt về tính dừng (\textit{stationarity}) hoặc khả năng dừng sau khi lấy sai phân bậc thấp. Khi đối mặt với sự biến đổi phức tạp của các biến thời tiết ngoại sinh (nhiệt độ, bức xạ) và các quan hệ phi tuyến tính bậc cao, các mô hình thống kê tuyến tính hoàn toàn mất đi độ chính xác và thường cho sai số dự báo rất lớn tại các đỉnh phụ tải.
+
+\subsection{Học máy Dạng bảng và Gradient Boosted Decision Trees}
+Sự ra đời của các thuật toán cây quyết định tăng cường gradient (\textit{Gradient Boosted Decision Trees} -- GBDT), tiêu biểu là XGBoost~\cite{chen2016xgboost} và LightGBM~\cite{ke2017lightgbm}, đã tạo nên bước ngoặt lớn trong lĩnh vực STLF. Các nghiên cứu tổng quan của Hong và Fan~\cite{hong2016probabilistic} đã chỉ ra rằng các mô hình dạng cây luôn chiếm ưu thế áp đảo trên các tập dữ liệu chuỗi thời gian dạng bảng có biến ngoại sinh nhờ khả năng mô hình hóa tự nhiên các quan hệ phi tuyến ngắt quãng, tính bất biến trước các phép co giãn thang đo đặc trưng, và cơ chế cắt tỉa thông minh chống quá khớp.
+
+Đặc biệt, công trình của Roy, Pyltsov và Hu~\cite{roy2025hourly} (arXiv:2505.11390) tại cuộc thi \textit{IISE PG\&E 2025} đã đề xuất chiến lược phân đoạn không gian thành 24 bài toán con độc lập tương ứng với 24 giờ trong ngày và huấn luyện 24 mô hình XGBoost riêng biệt. Cách tiếp cận này giúp triệt tiêu gánh nặng phải học sự biến thiên nhật triều mà không cần tới các hàm ánh xạ phức tạp, đồng thời kết hợp PCA để nén thông tin từ 5 trạm nhiệt độ và 5 trạm bức xạ mặt trời. Kết quả của bài báo gốc đã trở thành một cột mốc đối chuẩn quan trọng trong lĩnh vực STLF thực tế.
+
+\subsection{Deep Learning và Kiến trúc Transformers Chuỗi Thời gian}
+Trong những năm gần đây, nhiều kiến trúc mạng nơ-ron sâu (\textit{Deep Learning}) dựa trên cơ chế tự chú ý (\textit{Self-Attention}) đã được áp dụng vào dự báo chuỗi thời gian, tiêu biểu như Informer~\cite{zhou2021informer} với cơ chế \textit{ProbSparse attention}, Autoformer~\cite{wu2021autoformer} kết hợp phân tách chuỗi thời gian (\textit{series decomposition}), hay PatchTST~\cite{nie2023time} phân đoạn chuỗi thành các token dạng bản vá đa biến.
+
+Tuy nhiên, như đã được chứng minh định lượng trong bài báo của Roy et al.~\cite{roy2025hourly}, các mô hình Transformer phức tạp này thường có xu hướng \textit{underperform} so với các mô hình GBDT phân đoạn theo giờ trên dữ liệu STLF thực tế. Hiện tượng này xuất phát từ ba nguyên nhân học thuật cốt lõi:
+\begin{enumerate}
+    \item \textbf{Thiếu thiên kiến quy nạp thời gian (\textit{Weak Temporal Inductive Bias}):} Cơ chế tự chú ý xem xét mối liên hệ giữa các điểm thời gian một cách bình đẳng và chỉ dựa vào mã hóa vị trí (\textit{positional encoding}), khiến mô hình dễ bị phân tán bởi các nhiễu tần số cao thay vì ưu tiên các chu kỳ nhật triều và tuần hoàn cố định như mô hình cây phân đoạn.
+    \item \textbf{Hiện tượng quá khớp trên dữ liệu ngoại sinh phức tạp:} Khác với ngôn ngữ tự nhiên hay thị giác máy tính, dữ liệu khí tượng chuỗi thời gian chứa tỷ lệ tín hiệu trên nhiễu (\textit{signal-to-noise ratio}) tương đối thấp. Việc tối ưu hóa hàng triệu tham số của Transformer trên chuỗi thời gian 2--3 năm rất dễ dẫn tới hiện tượng ghi nhớ mẫu quá khớp (\textit{memorization}) thay vì học được quy luật tổng quát hóa.
+    \item \textbf{Độ trễ và chi phí tính toán:} Chi phí huấn luyện và suy luận của Transformer lớn hơn hàng chục lần so với XGBoost, tạo rào cản lớn khi triển khai thực tế trên các hệ thống giám sát điều độ thời gian thực của các công ty điện lực.
+\end{enumerate}
+
+\subsection{Học máy Tích hợp Tri thức Vật lý và Kỹ thuật Stacking Ensemble}
+Kỹ thuật tổng quát hóa xếp chồng (\textit{Stacked Generalization} hay \textit{Stacking}) được đề xuất lần đầu bởi Wolpert (1992)~\cite{wolpert1992stacked}, cho phép kết hợp sức mạnh của nhiều mô hình cơ sở thông qua một mô hình tổng hợp cấp cao (\textit{meta-learner}). Trong bài toán STLF, đa số các nghiên cứu Stacking truyền thống chỉ đưa vector dự báo của các mô hình cơ sở $[\hat{y}_1, \dots, \hat{y}_M]$ vào meta-learner. Cách tiếp cận tĩnh này bỏ qua hoàn toàn bối cảnh môi trường vận hành thời gian thực, khiến meta-learner không thể học được quy tắc phân quyền: ví dụ, khi nhiệt độ cực kỳ cao, mô hình nào đáng tin cậy hơn; khi vào ban đêm yên tĩnh, mô hình nào đưa ra dự báo ổn định hơn.
+
+Bên cạnh đó, trong vật lý nhiệt công trình, tiêu chuẩn ASHRAE~\cite{ashrae2021fundamentals} đã chứng minh khái niệm độ-ngày (\textit{Degree Days} bao gồm HDD và CDD) là công cụ toán học tối ưu để xấp xỉ tuyến tính từng đoạn mối quan hệ giữa nhiệt độ môi trường và hành vi tiêu thụ điện của các hệ thống HVAC. Bảng~\ref{tab:related_work_comparison} tóm tắt sự khác biệt về năng lực giữa các trường phái nghiên cứu.
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \caption{So sánh tổng hợp giữa các hướng tiếp cận trong bài toán Dự báo Phụ tải Điện Ngắn hạn.}
+    \label{tab:related_work_comparison}
+    \begin{tabularx}{\textwidth}{lcccc}
+        \toprule
+        \textbf{Phương pháp tiếp cận} & \textbf{Xử lý phi tuyến} & \textbf{Thiên kiến vật lý} & \textbf{Đa dạng sai số} & \textbf{Độ trễ tính toán} \\
+        \midrule
+        Thống kê (ARIMA, SARIMAX) & Rất kém & Không có & Không có & Rất thấp ($< 1$~s) \\
+        Time-Series Transformers & Tốt & Yếu & Không có & Rất cao ($> 30$~phút) \\
+        24-Hourly XGBoost (Roy et al.) & Rất tốt & Yếu (chỉ PCA) & Thấp (mô hình đơn) & Thấp ($< 1$~phút) \\
+        \textbf{Context-Aware Stacking (CAS)} & \textbf{Xuất sắc} & \textbf{Mạnh (HDD/CDD/Fourier)} & \textbf{Cao ($r = 0.6131$)} & \textbf{Thấp ($< 3$~phút)} \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
+
+Sự kết hợp giữa tri thức vật lý nhiệt công trình ASHRAE và kiến trúc Stacking nhận biết ngữ cảnh thời gian thực chính là nền tảng giúp đề tài giải quyết trọn vẹn các câu hỏi nghiên cứu đã đặt ra.
