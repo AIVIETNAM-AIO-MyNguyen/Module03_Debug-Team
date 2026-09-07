@@ -1,4 +1,27 @@
-\section{Nghiên cứu liên quan}
+\section{Tổng quan các nghiên cứu liên quan}
 \label{sec:related_work}
 
-% Nội dung phần này do thành viên khác trong nhóm phụ trách
+\subsection{Tiến trình phát triển các phương pháp dự báo phụ tải}
+Các phương pháp dự báo phụ tải điện ngắn hạn (\textit{Short-Term Load Forecasting} -- STLF) trong có thể phân chia thành ba giai đoạn phát triển chính.
+
+\textbf{Mô hình chuỗi thời gian thống kê:} Các phương pháp cổ điển như ARIMA, SARIMAX và Holt-Winters Exponential Smoothing~\cite{hyndman2018forecasting} cung cấp nền tảng toán học tường minh với chi phí tính toán thấp. Tuy nhiên, chúng dựa trên giả định về tính dừng (\textit{stationarity}) và quan hệ tuyến tính, khiến các mô hình này khó nắm bắt biến động thời tiết cực đoan và phản ứng phi tuyến của phụ tải điện.
+
+\textbf{Học máy dạng bảng (\textit{Tabular ML}):} Các thuật toán Gradient Boosted Decision Trees (GBDT) như XGBoost~\cite{chen2016xgboost} và LightGBM~\cite{ke2017lightgbm} đã trở thành giải pháp ưu việt cho các bài toán chuỗi thời gian phức tạp. Cấu trúc phân nhánh của cây cho phép xấp xỉ các quan hệ phi tuyến, xử lý tốt đặc trưng đa thang đo (multi-scale features) và kiểm soát quá khớp qua các cơ chế điều chuẩn (regularization) hiệu quả~\cite{hong2016probabilistic}.
+
+\textbf{Mô hình học sâu (\textit{Deep Learning}):} Sự phát triển của mạng hồi quy (RNN, LSTM), mạng tích chập thời gian (TCN) và các biến thể Transformer chuỗi thời gian (Informer~\cite{zhou2021informer}, Autoformer~\cite{wu2021autoformer}, PatchTST~\cite{nie2023time}) mở ra khả năng mô hình hóa phụ thuộc dài hạn qua cơ chế tự chú ý (self-attention). Tuy nhiên, các nghiên cứu thực nghiệm quy mô lớn~\cite{makridakis2018statistical} chỉ ra rằng trên dữ liệu chuỗi thời gian thực tế, mạng học sâu phức tạp không phải lúc nào cũng vượt trội hơn các thuật Học máy dạng bảng. Hơn nữa, khi chu kỳ dự báo kéo dài mà không có phản hồi nhãn (ground-truth feedback), cơ chế tự hồi quy (Autoregressive mechanism) dễ dẫn đến hiện tượng tích lũy sai số (\textit{error accumulation})~\cite{lai2018modeling}.
+
+\subsection{Nghiên cứu của Roy và cộng sự (2025)}
+Trong khuôn khổ cuộc thi \textit{IISE PG\&E Energy Analytics Challenge 2025}~\cite{pge2025zenodo}, Roy, Pyltsov và Hu~\cite{roy2025hourly} đã cung cấp một minh chứng thực nghiệm điển hình về ưu thế của Học máy dạng bảng trước các kiến trúc Transformer sâu. 
+
+Đặc trưng cốt lõi của bài toán PG\&E là bối cảnh ràng buộc: dự báo phụ tải trọn vẹn một năm mà không có giá trị phụ tải thực tế theo thời gian thực (không có nhãn phản hồi). Để giải quyết bài toán này, Roy và cộng sự~\cite{roy2025hourly} đề xuất chiến lược gồm: (i) Khử đa cộng tuyến giữa các trạm quan trắc bằng Phân tích Thành phần Chính (PCA); (ii) Chia chu kỳ ngày đêm thành 24 bài toán con theo giờ (\textit{24-Hourly Binning}) và huấn luyện 24 mô hình XGBoost độc lập tương ứng; và (iii) Bổ sung đặc trưng \textit{PCA Lag1} nhằm phản ánh quán tính nhiệt của môi trường. Kết quả thực nghiệm khẳng định hướng tiếp cận sử dụng XGBoost đạt độ chính xác vượt trội so với các mô hình học sâu.
+
+\subsection{Khoảng trống nghiên cứu và Đề xuất đóng góp}
+Mặc dù baseline của Roy và cộng sự~\cite{roy2025hourly} đạt hiệu năng ấn tượng, việc phân tích sâu cho thấy các khoảng trống nghiên cứu cần được giải quyết: (i) Chưa có các đặc trưng về vật lý nhiệt công trình; (ii) mã hóa thời gian một cách rời rạc có thể gây gián đoạn chu kỳ thời gian; (iii) chỉ sử dụng một họ mô hình đơn nhất chưa khai thác được tính bổ trợ giữa các thuật toán, mô hình khác nhau.
+
+Dựa trên các cơ sở đó, nghiên cứu này đề xuất các hướng mở rộng như sau:
+\begin{enumerate}
+    \item \textbf{Bổ sung tri thức vật lý nhiệt công trình:} Theo tiêu chuẩn ASHRAE~\cite{ashrae2021fundamentals}, nhu cầu điện năng cho sưởi ấm và làm mát (\textit{HVAC}) có mối quan hệ với nhiệt độ ngoài trời. Lấy mốc $18^\circ\text{C}$ làm cơ sở, ta tính được hai chỉ số nhiệt động lực học là \textit{Cooling Degree Days} (CDD) và \textit{Heating Degree Days} (HDD). Đồng thời, thay vì mã hóa thời gian một cách rời rạc, chùng tôi sử dụng các hàm điều hòa Fourier liên tục~\cite{cleveland1990stl, hyndman2018forecasting}.
+    \item \textbf{Khai thác tính bù trừ giữa các họ mô hình:} Mô hình ElasticNet~\cite{zou2005regularization} vốn ổn định ở khoảng phụ tải thấp và mô hình XGBoost~\cite{chen2016xgboost} nhạy cảm ở các mức phụ tải cao. Việc sử dụng kiến trúc \textit{Context-Aware Stacking} (CAS), với meta-learner (LightGBM~\cite{ke2017lightgbm}) nhận đồng thời dự báo từ hai mô hình cơ sở (ElasticNet và XGBoost) cùng với các đặc trưng kể trên; cho phép meta-learner tự động điều chỉnh tỷ trọng giữa hai mô hình đó dựa trên điều kiện vận hành cụ thể, từ đó tối ưu điểm mạnh của từng mô hình.
+\end{enumerate}
+
+Bên cạnh đó, để nâng cao độ tin cậy, nhóm nghiên cứu áp dụng phương pháp SHAP~\cite{lundberg2017shap} để bóc tách đóng góp của các đặc trưng ngoại sinh theo từng khung giờ trong ngày. Đồng thời, do các khoảng tin cậy dựa trên giả định phân phối chuẩn thường không phù hợp với dữ liệu phụ tải có tính dị phương sai và phân phối đuôi dày, chúng tôi ứng dụng lý thuyết \textit{Conformal Prediction} (CP)~\cite{vovk2005algorithmic} nhằm cung cấp các khoảng dự báo có bảo đảm bao phủ toán học không phụ thuộc phân phối (\textit{distribution-free validity}), hỗ trợ việc ra quyết định điều độ an toàn hơn.
