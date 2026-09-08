@@ -1,4 +1,42 @@
 \section{Giới thiệu và câu hỏi nghiên cứu}
 \label{sec:introduction}
 
-% Nội dung phần này do thành viên khác trong nhóm phụ trách
+\subsection{Bối cảnh và ý nghĩa thực tiễn của bài toán STLF}
+Dự báo phụ tải điện ngắn hạn (\textit{Short-Term Load Forecasting} -- STLF), với khoảng thời gian dự báo từ 1 giờ đến 24 giờ tới, là bài toán trung tâm trong công tác quản lý và vận hành hệ thống năng lượng hiện đại~\cite{hong2016probabilistic}. Trong một lưới điện xoay chiều, việc duy trì cân bằng công suất tức thời giữa tổng nguồn phát và tổng phụ tải tiêu thụ:
+\begin{equation}
+    \sum_{i} P_{\text{gen}, i}(t) = \sum_{j} P_{\text{load}, j}(t) + P_{\text{loss}}(t)
+\end{equation}
+là điều kiện tiên quyết để giữ vững tần số danh định (50/60~Hz) và bảo đảm độ ổn định của hệ thống điện. Do năng lượng điện quy mô lớn đòi hỏi chi phí lưu trữ rất tốn kém, mọi sai số trong dự báo phụ tải đều kéo theo tổn thất kinh tế đáng kể: nếu dự báo thiếu, đơn vị vận hành hệ thống điện (\textit{Independent System Operator} -- ISO) buộc phải khởi động khẩn cấp các tổ máy phát chạy dầu/khí dự phòng (\textit{peaking units}) với giá thị trường giao ngay (\textit{spot price}) rất cao; ngược lại, nếu dự báo thừa, các nhà máy điện cơ bản buộc phải giảm công suất phát, gây lãng phí nhiên liệu và phát sinh chi phí vận hành không cần thiết. Nghiên cứu của Hong và Fan~\cite{hong2016probabilistic} chỉ ra rằng việc giảm chỉ $1\%$ sai số dự báo phụ tải trong một lưới điện cấp tiểu bang có thể tiết kiệm hàng chục triệu USD chi phí vận hành mỗi năm.
+
+Trong bối cảnh hiện nay, quá trình chuyển dịch năng lượng và biến đổi khí hậu đang đặt bài toán STLF trước những thách thức lớn. Tỷ lệ thâm nhập cao của năng lượng tái tạo phân tán (đặc biệt là điện mặt trời áp mái) tạo nên hiện tượng biến dạng phụ tải ròng (\textit{duck curve}), trong khi sự gia tăng của các đợt nắng nóng kéo dài đẩy nhu cầu sử dụng các thiết bị điều hòa không khí (\textit{HVAC}) vượt xa các đỉnh phụ tải thông thường.
+
+\subsection{Khoảng trống nghiên cứu}
+Tại cuộc thi \textit{IISE PG\&E Energy Analytics Challenge 2025}~\cite{pge2025zenodo}, công trình của Roy, Pyltsov và Hu~\cite{roy2025hourly} (arXiv:2505.11390) đã chứng minh một phát hiện thực nghiệm then chốt: các mô hình hồi quy dạng bảng phân đoạn theo giờ (24 mô hình XGBoost độc lập cho 24 giờ trong ngày) hoàn toàn đánh bại các kiến trúc học sâu Transformer phức tạp (như PatchTST~\cite{nie2023time}, Informer~\cite{zhou2021informer}, Autoformer~\cite{wu2021autoformer}). Mô hình của bài báo gốc đạt RMSE $170.84$~MW và MAPE $5.38\%$ trên tập kiểm tra độc lập Năm 3 nhờ ứng dụng kỹ thuật PCA trên 5 trạm quan trắc nhiệt độ và 5 trạm bức xạ mặt trời kết hợp biến trễ động học 1 giờ ($\text{Lag1}$).
+
+Tuy nhiên, qua quá trình tái hiện độc lập và phân tích chi tiết, chúng tôi nhận thấy ba khoảng trống nghiên cứu cốt lõi chưa được giải quyết trong công trình của Roy et al.~\cite{roy2025hourly}:
+\begin{enumerate}
+    \item \textbf{Chưa khai thác đặc trưng vật lý về nhu cầu nhiệt:} Nhu cầu tiêu thụ điện phụ thuộc rất lớn vào việc sử dụng điều hòa không khí hoặc thiết bị sưởi ấm. Mối quan hệ giữa nhiệt độ môi trường và phụ tải điện thường tuân theo đường cong chữ U (\textit{U-shaped curve}) với ngưỡng tiện nghi cơ sở khoảng $18^\circ\text{C}$. Việc chỉ dùng các thành phần chính PCA tuyến tính đã làm phẳng các ngưỡng phi tuyến nhạy cảm này, khiến mô hình gặp khó khăn khi dự báo các đỉnh phụ tải cực đoan trong những đợt nắng nóng mùa hè.
+    \item \textbf{Bước nhảy gián đoạn của các biến thời gian rời rạc:} Việc sử dụng 12 biến nhị phân rời rạc cho 12 tháng tạo ra các bước nhảy đột ngột tại thời điểm chuyển giao giữa các tháng (đặc biệt giữa ngày 31/12 và ngày 01/01), chưa phản ánh đúng sự biến thiên liên tục của chu kỳ thời tiết theo tự nhiên.
+    \item \textbf{Chưa tận dụng tính bù trừ sai số giữa các mô hình:} Bài báo gốc chỉ dùng duy nhất mô hình cây XGBoost cho mọi thời điểm trong ngày. Trên thực tế, mô hình hồi quy tuyến tính (ElasticNet) có độ ổn định rất cao ở các khoảng phụ tải nền ban đêm ít biến động; ngược lại, mô hình cây quyết định (XGBoost) lại vượt trội trong việc xử lý các quan hệ phi tuyến vào giờ cao điểm nắng nóng. Việc kết hợp thông minh hai mô hình này theo ngữ cảnh thời gian thực để tận dụng thế mạnh của từng bên là hướng tiếp cận chưa từng được khai thác.
+\end{enumerate}
+
+\subsection{Mục tiêu và câu hỏi nghiên cứu}
+Để giải quyết ba khoảng trống học thuật nêu trên, nghiên cứu này xây dựng một mô hình học kết hợp theo ngữ cảnh hoàn chỉnh, tập trung trả lời ba câu hỏi nghiên cứu cụ thể:
+
+\begin{itemize}
+    \item \textbf{RQ1:} Việc bổ sung các chỉ số nhu cầu nhiệt (CDD và HDD theo ngưỡng cơ sở $18^\circ\text{C}$ chuẩn ASHRAE) cùng chuỗi điều hòa Fourier liên tục vào mô hình 24-XGBoost có cải thiện được độ chính xác (RMSE, MAPE, $R^2$) trên tập kiểm tra Năm 3 so với mô hình của Roy et al. (2025) hay không?
+    \item \textbf{RQ2:} Mức độ tương quan phần dư sai số giữa mô hình tuyến tính ElasticNet và mô hình phi tuyến XGBoost là bao nhiêu, và mỗi mô hình thể hiện ưu thế vượt trội trong những điều kiện vận hành cụ thể nào của lưới điện?
+    \item \textbf{RQ3:} Kiến trúc Context-Aware Stacking (CAS) đề xuất, khi được cung cấp thêm thông tin ngữ cảnh thời tiết và thời gian thực, có khả năng khai thác tối đa tính bù trừ của các mô hình cơ sở để tạo ra bước cải thiện vượt bậc về hiệu năng hay không?
+\end{itemize}
+
+Để trả lời ba câu hỏi trên, nghiên cứu thiết lập ba giả thuyết khoa học tương ứng: \textbf{H1} (Đặc trưng nhu cầu nhiệt CDD/HDD và sóng Fourier giúp giảm sai số mô hình); \textbf{H2} (ElasticNet và XGBoost có tương quan phần dư sai số thấp $r \ll 1.0$ và phân tầng ưu thế rõ rệt giữa ban đêm và ban ngày nắng nóng); và \textbf{H3} (Mô hình tổng hợp nhận biết ngữ cảnh sẽ học được cách điều phối linh hoạt, vượt trội hơn các phương pháp lấy trung bình cố định).
+
+\subsection{Đóng góp chính của nghiên cứu}
+Các đóng góp chính của nghiên cứu bao gồm:
+\begin{enumerate}
+    \item \textbf{Tái hiện độc lập và kiểm chứng chuẩn xác:} Tái hiện hoàn chỉnh quy trình, cấu hình và kết quả của bài báo gốc (Roy et al., 2025) trên ba giao thức thử nghiệm và tập kiểm tra Năm 3, thiết lập cơ sở đối chuẩn vững chắc.
+    \item \textbf{Kỹ thuật trích xuất đặc trưng vật lý và chu kỳ liên tục:} Bổ sung chỉ số HDD và CDD (ngưỡng $18^\circ\text{C}$) cùng sóng Fourier liên tục ($\sin/\cos$), giúp giảm ngay RMSE từ $171.66$~MW xuống $160.65$~MW (giảm $11.01$~MW so với baseline tái hiện và giảm $10.19$~MW so với số liệu công bố $170.84$~MW của bài báo gốc) trên tập kiểm tra Năm 3.
+    \item \textbf{Phát hiện và lượng hóa tính bù trừ giữa hai chế độ vận hành:} Chứng minh thực nghiệm hệ số tương quan phần dư giữa ElasticNet và XGBoost chỉ ở mức $r = 0.6131$. Xác nhận ElasticNet dẫn đầu trong chế độ phụ tải nền ban đêm (00:00--06:00: RMSE $131.33$~MW so với $141.37$~MW), trong khi XGBoost áp đảo trong các đợt nắng nóng (CDD $> 3^\circ\text{C}$: RMSE $244.16$~MW so với $313.27$~MW).
+    \item \textbf{Đề xuất kiến trúc Context-Aware Stacking (CAS):} Thiết kế mô hình tổng hợp (Meta-Learner LightGBM) tiếp nhận đồng thời dự báo OOF của các mô hình cơ sở cùng thông tin ngữ cảnh môi trường. Đạt kết quả với RMSE \textbf{141.81~MW}, MAPE \textbf{4.75\%}, và $R^2$ đạt \textbf{0.9136} trên tập Năm 3 (giảm \textbf{29.03~MW}, tương đương \textbf{17.00\% RMSE} so với bài báo gốc; kiểm định Diebold-Mariano đạt $p < 10^{-5}$).
+    \item \textbf{Định lượng giá trị kinh tế và giải thích minh bạch:} Ước tính mức giảm $29.03$~MW giúp tiết kiệm từ \textbf{5.0 đến 7.6 triệu USD mỗi năm} chi phí công suất dự phòng quay cho PG\&E; đồng thời làm rõ sự chuyển dịch mức độ quan trọng của các biến đầu vào theo giờ qua biểu đồ nhiệt SHAP 24 giờ.
+\end{enumerate}

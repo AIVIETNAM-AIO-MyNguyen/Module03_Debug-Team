@@ -36,9 +36,9 @@ def generate_shap_heatmap(forecaster, data_df: pd.DataFrame, feature_cols: list[
 
     plt.figure(figsize=(16, max(6, len(feature_cols) * 0.35)))
     sns.heatmap(heatmap_data, cmap='viridis', annot=False, fmt=".2f", linewidths=.5)
-    plt.title('Figure 10: SHAP Feature Importance by Hour of Day (Mean Absolute SHAP Value)', fontsize=13, pad=12)
-    plt.xlabel('Hour of Day (1 to 24)', fontsize=11)
-    plt.ylabel('Feature', fontsize=11)
+    plt.title('Mức độ ảnh hưởng của các đặc trưng theo từng giờ trong ngày (SHAP Feature Importance)', fontsize=13, pad=12, fontweight='bold')
+    plt.xlabel('Giờ trong ngày (Hour of Day: 1 - 24)', fontsize=11, fontweight='bold')
+    plt.ylabel('Đặc trưng (Feature)', fontsize=11, fontweight='bold')
     plt.tight_layout()
 
     heatmap_path = os.path.join(output_dir, 'fig_shap_heatmap.png')

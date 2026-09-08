@@ -1,28 +1,30 @@
 \section{Kết luận và hướng nghiên cứu tiếp theo}
 \label{sec:conclusion_and_future_work}
 
-Nghiên cứu này tập trung giải quyết bài toán dự báo phụ tải điện theo giờ cho lưới điện quy mô lớn của công ty PG\&E (bang California), xuất phát từ một đặc điểm thực tế: nhu cầu dùng điện vào ban đêm rất ổn định và bằng phẳng, trong khi ban ngày mùa hè lại tăng vọt và biến động phức tạp do nắng nóng. Nhằm giúp mô hình nắm bắt tốt cả hai trạng thái tiêu thụ này, chúng tôi đã bổ sung các đặc trưng gắn liền với quy luật thời tiết (sóng điều hòa Fourier theo mùa cùng chỉ số nhu cầu làm mát và sưởi ấm CDD/HDD), đồng thời xây dựng mô hình học kết hợp linh hoạt (\textit{Context-Aware Stacking} - CAS) để tận dụng thế mạnh bù trừ giữa mô hình hồi quy tuyến tính ElasticNet và mô hình cây XGBoost.
+\subsection{Kết luận}
+\label{subsec:conclusion}
+
+Nghiên cứu này tập trung giải quyết bài toán dự báo phụ tải điện theo giờ cho lưới điện quy mô lớn của công ty PG\&E (bang California), xuất phát từ một đặc điểm thực tế: nhu cầu dùng điện vào ban đêm rất ổn định và bằng phẳng, trong khi ban ngày mùa hè lại tăng vọt và biến động phức tạp do nắng nóng. Nhằm giúp mô hình nắm bắt tốt cả hai trạng thái tiêu thụ này, chúng tôi đã bổ sung các đặc trưng gắn liền với quy luật thời tiết (sóng điều hòa Fourier theo mùa cùng chỉ số nhu cầu làm mát và sưởi ấm CDD/HDD), đồng thời xây dựng mô hình học kết hợp theo ngữ cảnh (\textit{Context-Aware Stacking} -- CAS) để tận dụng thế mạnh bù trừ giữa mô hình hồi quy tuyến tính ElasticNet và mô hình cây XGBoost.
 
 Từ các kết quả thực nghiệm thu được, nghiên cứu rút ra ba kết luận quan trọng:
 \begin{enumerate}
-    \item \textbf{Mô hình đề xuất đạt độ chính xác vượt trội:} Trên tập dữ liệu kiểm thử độc lập Năm 3 (năm 2022), mô hình CAS đạt sai số RMSE \textbf{141.81 MW}, MAPE \textbf{4.75\%} và hệ số $R^2$ đạt \textbf{0.9136}. Kết quả này giúp cắt giảm tới \textbf{29.03 MW} sai số (tương đương mức cải thiện \textbf{17.00\%}) so với mô hình cơ sở 24-Hourly XGBoost của bài báo gốc \cite{iise2025pge}, đồng thời vượt trội hơn tất cả các mô hình đơn lẻ khác.
+    \item \textbf{Mô hình đề xuất đạt độ chính xác vượt trội:} Trên tập dữ liệu kiểm tra độc lập Năm~3 (năm 2022), mô hình CAS đạt sai số RMSE \textbf{141.81~MW}, MAPE \textbf{4.75\%} và hệ số $R^2$ đạt \textbf{0.9136}. Kết quả này giúp cắt giảm tới \textbf{29.03~MW} sai số (tương đương mức cải thiện \textbf{17.00\%}) so với mô hình cơ sở 24-Hourly XGBoost của bài báo gốc~\cite{roy2025hourly}, đồng thời vượt trội hơn tất cả các mô hình đơn lẻ khác.
     \item \textbf{Đặc trưng thời tiết và sự kết hợp bù trừ đóng vai trò then chốt:} Việc bổ sung chu kỳ mùa liên tục qua sóng Fourier và chỉ số nhu cầu nhiệt CDD/HDD giúp giảm trực tiếp $10.04\text{ MW}$ sai số. Nghiên cứu cũng chứng minh trên thực tế rằng mô hình tuyến tính ElasticNet dự báo ban đêm tốt hơn hẳn mô hình cây XGBoost ($131.33\text{ MW}$ so với $141.37\text{ MW}$), trong khi XGBoost lại chiếm ưu thế áp đảo khi nhiệt độ tăng cao vào mùa hè ($244.16\text{ MW}$ so với $313.27\text{ MW}$). Hệ số tương quan sai số $r = 0.6131$ khẳng định hai mô hình này là những mảnh ghép bù trừ rất lý tưởng cho nhau.
     \item \textbf{Mô hình tổng hợp (Meta-Learner) điều phối linh hoạt theo ngữ cảnh:} Phân tích SHAP và sai số theo từng điều kiện khẳng định mô hình tổng hợp Meta-Learner (LightGBM) đã tự động nắm bắt quy luật thực tế: ưu tiên kết quả từ mô hình tuyến tính khi thời tiết ôn hòa hoặc ban đêm, và tăng cường tỷ trọng của mô hình cây khi đối mặt với các đỉnh tải do nắng nóng ban ngày.
 \end{enumerate}
 
-\textbf{Đóng góp thực tế của bài báo:}
+\textbf{Đóng góp thực tiễn của bài báo:}
 \begin{itemize}
-    \item \textit{Về mặt giải pháp kỹ thuật:} Đưa ra một cách kết hợp thông minh giữa mô hình tuyến tính đơn giản và mô hình cây phi tuyến, chứng minh rằng không cần phải áp dụng các mạng học sâu (Deep Learning) cồng kềnh mà vẫn có thể nâng cao độ chính xác dự báo một cách rõ rệt.
-    \item \textit{Về mặt vận hành hệ thống điện:} Mức cải thiện $17.00\%$ sai số RMSE có ý nghĩa kinh tế trực tiếp: giúp các kỹ sư điều độ dự báo sát nhu cầu dùng điện thực tế, từ đó cắt giảm chi phí duy trì các tổ máy phát điện dự phòng, hạn chế lãng phí năng lượng và chủ động ứng phó với các đợt cao điểm nắng nóng.
+    \item \textit{Về mặt giải pháp kỹ thuật:} Đưa ra cách kết hợp hiệu quả giữa mô hình tuyến tính đơn giản và mô hình cây phi tuyến, chứng minh rằng không cần phải áp dụng các mạng học sâu cồng kềnh mà vẫn có thể nâng cao độ chính xác dự báo một cách rõ rệt.
+    \item \textit{Về mặt vận hành hệ thống điện:} Mức cải thiện $17.00\%$ sai số RMSE có ý nghĩa kinh tế trực tiếp: giúp các kỹ sư điều độ dự báo sát nhu cầu dùng điện thực tế, từ đó tiết kiệm từ 5.0 đến 7.6 triệu USD chi phí duy trì các tổ máy phát điện dự phòng mỗi năm, hạn chế lãng phí năng lượng và chủ động ứng phó với các đợt cao điểm nắng nóng.
 \end{itemize}
 
-\textbf{Giới hạn của nghiên cứu:}
-Kết quả nghiên cứu hiện được kiểm chứng trên tập dữ liệu của khu vực Bắc California (khí hậu Địa Trung Hải ôn hòa) và dựa trên số liệu thời tiết quan trắc thực tế đo tại trạm, chưa tính đến sai số của các bản tin dự báo khí tượng thời gian thực.
+\subsection{Hướng nghiên cứu tiếp theo}
+\label{subsec:future_work}
 
-\textbf{Hướng nghiên cứu tiếp theo:}
-Để tiếp tục hoàn thiện mô hình và phục vụ tốt hơn cho công tác vận hành ngoài thực tế, các hướng phát triển tiếp theo nên tập trung vào:
+Để tiếp tục hoàn thiện mô hình và phục vụ tốt hơn cho công tác vận hành ngoài thực tế, các hướng nghiên cứu tiếp theo nên tập trung vào:
 \begin{enumerate}
-    \item \textit{Đánh giá tác động của sai số dự báo thời tiết:} Thử nghiệm mô hình với các dữ liệu dự báo khí tượng mô phỏng (NWP) có chứa sai số nhằm kiểm tra mức độ ảnh hưởng đến kết quả khi triển khai thực tế.
+    \item \textit{Đánh giá tác động của sai số dự báo thời tiết:} Thử nghiệm mô hình với các dữ liệu dự báo khí tượng mô phỏng (NWP) có chứa sai số ngẫu nhiên nhằm kiểm tra độ bền vững của mô hình khi triển khai ngoài hiện trường.
     \item \textit{Kiểm nghiệm trên các vùng khí hậu khác biệt:} Áp dụng quy trình CAS cho các hệ thống điện có đặc thù thời tiết khác, ví dụ như lưới điện Texas (nhiệt đới ẩm, nhu cầu điều hòa rất lớn) hay các bang phía Bắc có mùa đông tuyết giá kéo dài, đồng thời tối ưu lại ngưỡng nhiệt cơ sở của chỉ số nhu cầu nhiệt CDD/HDD cho phù hợp với tập quán sinh hoạt của từng địa phương.
-    \item \textit{Dự báo khoảng tin cậy thay vì chỉ dự báo một con số điểm:} Tích hợp thêm các kỹ thuật ước lượng độ bất định (như \textit{Conformal Prediction} hoặc hồi quy phân vị) vào mô hình Stacking, nhằm cung cấp khoảng dao động tải tin cậy cho người điều độ, giúp nâng cao tính an toàn trong quản lý lưới điện.
+    \item \textit{Phát triển khoảng tin cậy thích ứng trực tuyến:} Mở rộng phương pháp Conformal Prediction sang các thuật toán thích ứng trực tuyến (\textit{Adaptive Conformal Prediction}) nhằm tự động co giãn khoảng tin cậy khi hệ thống đối mặt với các đợt tích tụ nhiệt cực đoan kéo dài nhiều ngày liên tiếp.
 \end{enumerate}
