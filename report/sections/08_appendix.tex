@@ -1,0 +1,179 @@
+\section*{Phụ lục}
+\addcontentsline{toc}{section}{Phụ lục}
+\label{sec:appendix}
+
+Phần phụ lục này cung cấp thông tin đối chiếu kỹ thuật chi tiết theo đúng cấu trúc tiêu chuẩn của chương trình nghiên cứu \textbf{AI Conquer 2026} (Module 03), bao gồm 7 nội dung minh bạch phục vụ công tác thẩm định và tái lập kết quả.
+
+% =============================================================================
+\subsection*{Phụ lục 1: Thông tin chương trình AI VIET NAM và Nhóm nghiên cứu}
+\label{subsec:appendix_aivietnam}
+
+\begin{itemize}
+    \item \textbf{Đơn vị tổ chức:} AI VIET NAM (\url{https://aivietnam.edu.vn/}).
+    \item \textbf{Khóa đào tạo chuyên sâu:} AI Conquer 2026 -- Chương trình đào tạo nhân tài Trí tuệ nhân tạo định hướng công bố khoa học quốc tế và học thuật sau đại học.
+    \item \textbf{Chuyên đề nghiên cứu:} Module 03 -- Học máy cho Chuỗi thời gian và Dự báo phụ tải điện năng (Machine Learning for Time Series Forecasting).
+    \item \textbf{Nhóm thực hiện (Debug Team):}
+    \begin{enumerate}
+        \item \textbf{Nguyễn Thị Diễm My} (Trưởng nhóm / Điều phối nghiên cứu \& Kỹ thuật mô hình).
+        \item \textbf{Lê Tiến Anh} (Kỹ thuật trích xuất đặc trưng vật lý \& Phân tích đa cộng tuyến PCA).
+        \item \textbf{Nguyễn Mạnh Tân} (Tái hiện mô hình cơ sở Roy et al. \& Xây dựng đường ống kiểm thử).
+        \item \textbf{Hoàng Nguyễn Nhật Minh} (Phát triển mô hình Stacking theo ngữ cảnh \& Tối ưu hóa siêu tham số).
+        \item \textbf{Lê Minh Hoàng} (Phân tích giải thích mô hình SHAP \& Trực quan hóa dữ liệu).
+    \end{enumerate}
+\end{itemize}
+
+% =============================================================================
+\subsection*{Phụ lục 2: Kho lưu trữ mã nguồn (GitHub Repository)}
+\label{subsec:appendix_github}
+
+Toàn bộ mã nguồn nghiên cứu, kịch bản thực thi và tài liệu báo cáo được công khai minh bạch tại kho lưu trữ GitHub chính thức của dự án:
+\begin{center}
+    \url{https://github.com/AIVIETNAM-AIO-MyNguyen/Module03_Debug-Team}
+\end{center}
+
+\textbf{Cấu trúc cây thư mục mã nguồn chính:}
+\begin{itemize}
+    \item \texttt{src/}: Mã nguồn cốt lõi của giải pháp CAS đề xuất:
+    \begin{itemize}
+        \item \texttt{feature\_engineering.py}: Mô-đun trích xuất CDD/HDD ($18^\circ\text{C}$), sóng Fourier và PCA giảm chiều ngoại sinh.
+        \item \texttt{models/}: Triển khai kiến trúc CAS và các mô hình đối chuẩn (\texttt{CAS}, \texttt{24-XGBoost}, \texttt{SingleXGBoost}).
+        \item \texttt{explainability/}: Mô-đun phân tích tầm quan trọng đặc trưng SHAP theo 24 khung giờ.
+        \item \texttt{visualization/}: Mô-đun trực quan hóa dữ liệu chuẩn xuất bản khoa học.
+    \end{itemize}
+    \item \texttt{replication/}: Mã nguồn tái hiện độc lập 100\% công trình đối chuẩn của Roy et al.~\cite{roy2025hourly}.
+    \item \texttt{run\_extended\_experiments.py}: Đường ống tự động hóa một bước (End-to-End Execution Pipeline).
+    \item \texttt{report/}: Toàn bộ mã nguồn \LaTeX{} và các hình ảnh chất lượng cao của bài báo cáo.
+    \item \texttt{output/}: Tệp kết quả dự báo, ma trận tương quan và bảng số liệu định lượng.
+\end{itemize}
+
+\textbf{Lệnh tái hiện kết quả trong 1 bước:}
+\begin{verbatim}
+pip install -r requirements.txt
+python run_extended_experiments.py
+\end{verbatim}
+
+% =============================================================================
+\subsection*{Phụ lục 3: Bộ dữ liệu nghiên cứu (Dataset)}
+\label{subsec:appendix_dataset}
+
+Bộ dữ liệu sử dụng trong bài báo có nguồn gốc từ cuộc thi học thuật danh tiếng:
+\begin{itemize}
+    \item \textbf{Tên cuộc thi:} \textit{IISE PG\&E Energy Analytics Challenge 2025}~\cite{pge2025zenodo}.
+    \item \textbf{Đơn vị chủ trì:} Viện Kỹ sư Công nghiệp và Hệ thống Hoa Kỳ (IISE) phối hợp cùng Công ty Điện lực và Khí đốt Thái Bình Dương (Pacific Gas and Electric Company -- PG\&E, Bắc California).
+    \item \textbf{Định danh truy cập mở (DOI):} \url{https://doi.org/10.5281/zenodo.17085273}.
+    \item \textbf{Kích thước dữ liệu:} 3 năm liên tục với chu kỳ 1 giờ/mẫu ($26.304$ mốc giờ):
+    \begin{itemize}
+        \item \textit{Tập huấn luyện (Năm 1 và Năm 2):} 17.544 mốc giờ (gồm 8.784 giờ của năm nhuận 2020 và 8.760 giờ của năm 2021), đầy đủ thông tin thời tiết và phụ tải thực tế ($\text{MW}$).
+        \item \textit{Tập kiểm tra độc lập (Năm 3):} 8.760 mốc giờ kiểm tra độc lập trong bối cảnh thực tế.
+    \end{itemize}
+    \item \textbf{Danh mục trường dữ liệu:} \texttt{Year}, \texttt{Month}, \texttt{Day}, \texttt{Hour}, \texttt{Load} (MW), 5 chuỗi nhiệt độ bề mặt (\texttt{Site-1 Temp} $\ldots$ \texttt{Site-5 Temp}), và 5 chuỗi bức xạ mặt trời trực tiếp (\texttt{Site-1 GHI} $\ldots$ \texttt{Site-5 GHI}).
+\end{itemize}
+
+% =============================================================================
+\subsection*{Phụ lục 4: Cấu hình thực nghiệm và Siêu tham số}
+\label{subsec:appendix_hyperparameters}
+
+Bảng~\ref{tab:appendix_hyperparameters} tóm tắt cấu hình siêu tham số chi tiết của các mô hình trong kiến trúc CAS đề xuất và các đường ống đối chuẩn.
+
+\begin{table}[H]
+\centering
+\small
+\hbadness=10000
+\caption{Chi tiết cấu hình siêu tham số của các thuật toán trong nghiên cứu}
+\label{tab:appendix_hyperparameters}
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\linewidth}{@{} l >{\RaggedRight\arraybackslash}X l @{}}
+\toprule
+\textbf{Mô hình} & \textbf{Tham số kỹ thuật} & \textbf{Giá trị thiết lập} \\
+\midrule
+\multirow{4}{*}{\textbf{ElasticNet (Cơ sở 1)}} & Hệ số phạt chính quy ($\alpha$) & $0.1$ \\
+& Tỷ lệ chuẩn điều chuẩn (\texttt{l1\_ratio}) & $0.5$ (cân bằng chuẩn $L_1$ và $L_2$) \\
+& Số vòng lặp tối đa (\texttt{max\_iter}) & $2.000$ \\
+& Dung sai hội tụ (\texttt{tol}) & $10^{-4}$ \\
+\midrule
+\multirow{6}{*}{\textbf{XGBoost (Cơ sở 2)}} & Số lượng cây quyết định (\texttt{n\_estimators}) & $200$ \\
+& Độ sâu tối đa của cây (\texttt{max\_depth}) & $6$ \\
+& Tốc độ học (\texttt{learning\_rate}) & $0.1$ \\
+& Tỷ lệ lấy mẫu dòng (\texttt{subsample}) & $0.8$ \\
+& Tỷ lệ lấy mẫu cột (\texttt{colsample\_bytree}) & $0.8$ \\
+& Hàm mục tiêu tổn thất (\texttt{objective}) & \texttt{reg:squarederror} \\
+\midrule
+\multirow{5}{*}{\textbf{LightGBM (Meta-Learner CAS)}} & Số lượng cây (\texttt{n\_estimators}) & $150$ \\
+& Độ sâu tối đa (\texttt{max\_depth}) & $4$ \\
+& Tốc độ học (\texttt{learning\_rate}) & $0.05$ \\
+& Số lượng lá tối đa (\texttt{num\_leaves}) & $15$ \\
+& Mẫu tối thiểu trên lá (\texttt{min\_child\_samples}) & $20$ \\
+\midrule
+\multirow{3}{*}{\textbf{Đặc trưng vật lý \& Chu kỳ}} & Ngưỡng nhiệt cơ sở ($T_{\text{base}}$) cho CDD/HDD & $18.0^\circ\text{C}$ (Chuẩn ASHRAE) \\
+& Bậc điều hòa chu kỳ năm ($K_{\text{year}}$) & $1$ ($\sin, \cos$ với chu kỳ 365.25 ngày) \\
+& Bậc điều hòa chu kỳ ngày ($K_{\text{day}}$) & $1$ ($\sin, \cos$ với chu kỳ 24.0 giờ) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% =============================================================================
+\subsection*{Phụ lục 5: Kết quả thực nghiệm bổ trợ (Supplementary Results)}
+\label{subsec:appendix_supplementary}
+
+\paragraph{Phân tích độ chính xác theo 4 mùa trong năm trên tập kiểm tra Năm 3:}
+Bảng~\ref{tab:seasonal_breakdown} trình bày chi tiết hiệu năng của mô hình CAS theo 4 mùa tự nhiên của bang California trên toàn bộ 8.760 giờ của Năm 3.
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{Độ chính xác dự báo của mô hình CAS phân rã theo 4 mùa trên tập kiểm tra Năm 3 (2022)}
+\label{tab:seasonal_breakdown}
+\setlength{\tabcolsep}{3.8pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\linewidth}{@{} >{\RaggedRight\arraybackslash}X c c c c c c @{}}
+\toprule
+\textbf{Mùa trong năm} & \textbf{Số giờ} & \textbf{RMSE (MW)} $\downarrow$ & \textbf{MAE (MW)} $\downarrow$ & \textbf{MAPE (\%)} $\downarrow$ & \textbf{sMAPE (\%)} $\downarrow$ & $\mathbf{R^2}$ $\uparrow$ \\
+\midrule
+Mùa Đông (Tháng 12, 1, 2) & 2.160 & \textbf{114.55} & \textbf{84.86} & \textbf{4.15\%} & \textbf{4.14\%} & 0.8658 \\
+Mùa Xuân (Tháng 3, 4, 5) & 2.208 & 140.59 & 99.56 & 5.74\% & 5.51\% & 0.8216 \\
+Mùa Hè (Tháng 6, 7, 8) & 2.208 & 143.85 & 107.23 & 4.58\% & 4.51\% & \textbf{0.9103} \\
+Mùa Thu (Tháng 9, 10, 11) & 2.184 & 187.45 & 136.13 & 5.47\% & 5.58\% & 0.8834 \\
+\midrule
+\textbf{Cả năm 2022 (Tổng thể)} & \textbf{8.760} & \textbf{141.81} & \textbf{106.98} & \textbf{4.75\%} & \textbf{4.71\%} & \textbf{0.9136} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Số liệu cho thấy mô hình CAS đạt độ chính xác cao nhất vào mùa đông (RMSE $114.55\text{ MW}$, MAPE $4.15\%$) nhờ phụ tải ổn định và tính dự báo trơn tru của đặc trưng HDD. Vào mùa hè, dù phụ tải đỉnh vượt $4.000\text{ MW}$, hệ số $R^2$ vẫn đạt mức kỷ lục $0.9103$. Mùa thu có sai số RMSE cao hơn do đợt sóng nhiệt lịch sử đầu tháng 9 gây ra hiện tượng quán tính nhiệt tích tụ đã được phân tích ở mục phân tích lỗi.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.96\linewidth]{figures/Figure_7_Final_Forecast_by_Month.png}
+\caption{Đường cong dự báo phụ tải chi tiết theo từng giờ qua 12 tháng của tập kiểm tra Năm 3.}
+\label{fig:monthly_forecast}
+\end{figure}
+
+Hình~\ref{fig:monthly_forecast} minh họa trực quan 12 khung hình dự báo từng giờ cho cả 12 tháng. Đường trung bình trượt 24 giờ màu đỏ thể hiện tính mượt mà của xu thế trung hạn, chứng minh mô hình không bị quá khớp cục bộ.
+
+% =============================================================================
+\subsection*{Phụ lục 6: Trọng số mô hình, File dự báo và Nhật ký huấn luyện (Model Artifacts \& Logs)}
+\label{subsec:appendix_artifacts}
+
+Toàn bộ kết quả dự báo và tệp nhật ký thực thi được đóng gói hoàn chỉnh trong thư mục \texttt{output/}:
+\begin{itemize}
+    \item \texttt{predictions\_xgboost.xlsx} và \texttt{predictions\_xgboost.csv}: Chứa đầy đủ 8.760 dòng kết quả dự báo phụ tải từng giờ của Năm 3, bao gồm mốc thời gian, giá trị phụ tải thực tế, giá trị dự báo CAS và sai số lệch tuyệt đối.
+    \item \texttt{results\_master\_paper\_comparison.csv}: Bảng tổng hợp đối chuẩn hiệu năng giữa 5 cấu hình mô hình qua 3 kịch bản đánh giá.
+    \item \texttt{results\_conditional\_regime\_errors.csv}: Bảng phân tích sai số RMSE chi tiết theo 8 điều kiện vận hành và thời tiết thực tế.
+    \item \texttt{results\_residual\_correlation.csv}: Ma trận tương quan Pearson phần dư giữa các mô hình thành phần.
+    \item \texttt{shap\_importance\_by\_hour.csv}: Bảng giá trị đóng góp trung bình |SHAP| của từng biến cho 24 mô hình theo giờ.
+\end{itemize}
+
+% =============================================================================
+\subsection*{Phụ lục 7: Slide thuyết trình và Báo cáo nghiệm thu}
+\label{subsec:appendix_presentation}
+
+\begin{itemize}
+    \item \textbf{Slide báo cáo:} Bộ slide thuyết trình đồ án Module 03 định dạng PDF được lưu trữ tại kho mã nguồn dự án:
+    \begin{center}
+        \texttt{presentation\_Module03\_DebugTeam.pdf}
+    \end{center}
+    \item \textbf{Nội dung slide:} Tóm tắt 15 trang trực quan gồm: Bối cảnh STLF, Phân tích bài báo gốc, Điểm nghẽn kỹ thuật, Kiến trúc CAS, Bằng chứng thực nghiệm hai chế độ vận hành (Dual-Regime), Đánh giá kinh tế (\$5.0--\$7.6M/năm) và Demo kiểm chứng.
+    \item \textbf{Thông tin liên hệ nhóm:} Mọi thắc mắc học thuật và yêu cầu trao đổi chuyên môn xin gửi về đại diện nhóm nghiên cứu qua email học thuật: \texttt{s4053063@rmit.edu.vn} hoặc kênh hỗ trợ học tập của AI VIET NAM.
+\end{itemize}
+

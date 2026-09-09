@@ -1,0 +1,97 @@
+\section{Dữ liệu và thiết kế thí nghiệm}
+\label{sec:experiments}
+
+Phần này trình bày chi tiết quy trình xử lý dữ liệu, tập đặc trưng 24 biến, cấu hình các mô hình thử nghiệm, chiến lược huấn luyện và các thước đo đánh giá hiệu năng nhằm trả lời các câu hỏi nghiên cứu (RQ1, RQ2, RQ3) đã đặt ra.
+
+%------------------------------------------------------------------------------
+\subsection{Dữ liệu thực nghiệm và tiền xử lý}
+\label{subsec:data_pipeline}
+
+\subsubsection{Nguồn dữ liệu và phân chia tập mẫu}
+Dữ liệu sử dụng trong nghiên cứu này bắt nguồn từ cuộc thi \textit{IISE PG\&E Energy Analytics Challenge 2025}~\cite{pge2025zenodo}, phản ánh phụ tải điện thực tế của lưới điện Pacific Gas and Electric Company (Bắc California) trong ba năm liên tục (2020--2022) với tần suất đo 1 giờ một lần:
+\begin{itemize}
+    \item \textbf{Tập huấn luyện (Training Set):} Gồm Năm~1 (năm nhuận 2020 gồm $8.784$ giờ) và Năm~2 (2021 gồm $8.760$ giờ) với tổng cộng $17.544$ mốc giờ quan sát. Tập này chứa đầy đủ biến phụ tải thực tế ($\texttt{Load}$, đơn vị MW), thông tin thời gian và 10 chuỗi biến ngoại sinh từ 5 trạm quan trắc khí tượng ($\texttt{Site-1}\ldots\texttt{Site-5}$ về nhiệt độ và bức xạ mặt trời GHI).
+    \item \textbf{Tập kiểm tra độc lập (Hold-out Test Set):} Gồm toàn bộ Năm~3 (2022) với 8.760 mốc giờ quan sát. Đây là tập dữ liệu kiểm tra độc lập dùng để đánh giá cuối cùng, phản ánh đúng kịch bản vận hành thực tế khi hệ thống phải dự báo phụ tải cho cả năm tiếp theo mà không có giá trị phụ tải thực tế phản hồi theo thời gian thực.
+\end{itemize}
+
+\subsubsection{Quy trình tiền xử lý dữ liệu}
+Quy trình tiền xử lý được chuẩn hóa theo các bước:
+\begin{enumerate}
+    \item \textbf{Ánh xạ thời gian thực:} Biến định danh $\texttt{Year} \in \{1, 2, 3\}$ được ánh xạ về năm dương lịch $\{2020, 2021, 2022\}$ để trích xuất chính xác ngày thứ bao nhiêu trong năm ($\text{DOY} \in [1, 366]$), có tính đến năm nhuận 2020.
+    \item \textbf{Mã hóa lịch biểu và ngày lễ:} Xây dựng biến nhị phân $\texttt{Is\_Weekend}$ (Thứ 7 và Chủ nhật) cùng biến $\texttt{Is\_Holiday}$ đối chiếu theo danh mục 35 ngày nghỉ lễ liên bang Hoa Kỳ trong giai đoạn 2020--2022 (bao gồm Memorial Day, Independence Day, Labor Day, Thanksgiving, Christmas,...).
+    \item \textbf{Xử lý giá trị biên khi tạo biến trễ thời tiết:} Việc tạo các biến trễ động học $\text{Lag1}$ cho thời tiết ($\text{PCA\_Temp\_Lag1}$ và $\text{PCA\_GHI\_Lag1}$) làm khuyết giá trị tại thời điểm đầu tiên của chuỗi, do đó phương pháp điền biên \texttt{bfill} (backfill) và \texttt{ffill} (forward-fill) được áp dụng tại điểm đầu chuỗi để bảo toàn nguyên vẹn 17.544 mẫu huấn luyện và 8.760 mẫu kiểm tra mà không làm rò rỉ thông tin tương lai. Lưu ý rằng bài toán dự báo phụ tải trọn vẹn một năm không có giá trị phụ tải thực tế phản hồi theo thời gian thực, do vậy mô hình hoàn toàn không sử dụng bất kỳ biến trễ phụ tải (\textit{Load Lag}) nào.
+\end{enumerate}
+
+\subsubsection{Tập đặc trưng 24 biến}
+\label{subsubsec:feature_space}
+Từ dữ liệu thô, chúng tôi xây dựng tập đặc trưng gồm 24 biến đầu vào chuẩn hóa:
+\begin{itemize}
+    \item \textbf{Nhóm đặc trưng gốc bài báo (18 biến)~\cite{roy2025hourly}:} Thành phần chính nhiệt độ $\text{PCA\_Temp}$, bức xạ $\text{PCA\_GHI}$, biến trễ quán tính nhiệt $\text{PCA\_Temp\_Lag1}$, $\text{PCA\_GHI\_Lag1}$, biến ngày nghỉ $\text{Is\_Weekend}$, $\text{Is\_Holiday}$, và 12 biến nhị phân tháng $\text{Month\_1}\ldots\text{Month\_12}$.
+    \item \textbf{Nhóm chuỗi điều hòa Fourier liên tục (4 biến):} $[\text{Sin\_Year}, \text{Cos\_Year}]$ (mô hình hóa chu kỳ mùa trơn tru) và $[\text{Sin\_Hour}, \text{Cos\_Hour}]$ (mô hình hóa chu kỳ ngày/đêm 24 giờ).
+    \item \textbf{Nhóm chỉ số nhu cầu nhiệt (2 biến):} Chỉ số nhu cầu sưởi ấm $\text{HDD}$ và nhu cầu làm mát $\text{CDD}$ tính theo ngưỡng tiện nghi cơ sở $18^\circ\text{C}$ chuẩn ASHRAE~\cite{ashrae2021fundamentals, quayle1980heating}.
+\end{itemize}
+
+%------------------------------------------------------------------------------
+\subsection{Các cấu hình thử nghiệm bóc tách (Ablation)}
+\label{subsec:ablation_configs}
+
+Để xác định chính xác mức độ đóng góp của từng thành phần cải tiến (nhằm trả lời toàn diện các câu hỏi nghiên cứu RQ1, RQ2 và RQ3), nghiên cứu thiết lập bốn cấu hình thử nghiệm bóc tách tăng dần:
+\begin{enumerate}
+    \item \textbf{Cấu hình (1) -- Paper Baseline (Mô hình gốc):} 24 mô hình XGBoost độc lập theo từng giờ, sử dụng đúng 18 đặc trưng của bài báo gốc~\cite{roy2025hourly}.
+    \item \textbf{Cấu hình (2) -- Baseline + Fourier (22 biến):} Bổ sung 4 biến sóng Fourier liên tục vào 18 đặc trưng gốc, kiểm chứng vai trò của tính liên tục thời gian thay thế cho các biến tháng rời rạc (RQ1).
+    \item \textbf{Cấu hình (3) -- Feature-Enhanced (24 biến):} Bổ sung tiếp 2 biến nhu cầu nhiệt CDD/HDD vào Cấu hình (2), kiểm chứng đóng góp của các đặc trưng vật lý trên mô hình 24-XGBoost (RQ1).
+    \item \textbf{Cấu hình (4) -- Context-Aware Stacking (CAS đề xuất):} Tích hợp toàn bộ 24 đặc trưng vào kiến trúc Stacking gồm mô hình tuyến tính ElasticNet, mô hình cây phi tuyến XGBoost và mô hình tổng hợp LightGBM theo ngữ cảnh (RQ2, RQ3).
+\end{enumerate}
+
+%------------------------------------------------------------------------------
+\subsection{Chiến lược huấn luyện và tối ưu siêu tham số}
+\label{subsec:training_strategy}
+
+\paragraph{Kịch bản phân chia dữ liệu:}
+Để bảo đảm tính khái quát hóa và kiểm tra độ ổn định qua các năm, ba kịch bản thử nghiệm được thực hiện:
+\begin{itemize}
+    \item \textbf{Kịch bản 1 (Năm 1 $\to$ Năm 2):} Huấn luyện trên Năm~1 (2020), kiểm tra trên Năm~2 (2021).
+    \item \textbf{Kịch bản 2 (Năm 2 $\to$ Năm 1):} Huấn luyện trên Năm~2 (2021), kiểm tra trên Năm~1 (2020).
+    \item \textbf{Kịch bản 3 (Kiểm tra độc lập Năm 3):} Huấn luyện trên Năm~1 + Năm~2 (17.544 giờ), kiểm tra độc lập trên Năm~3 (2022, gồm 8.760 giờ). Đây là thước đo đối chuẩn chính của nghiên cứu.
+\end{itemize}
+
+\paragraph{Cấu hình mô hình cơ sở (Base Models):}
+\begin{itemize}
+    \item \textbf{ElasticNet:} Tối ưu hóa bằng thuật toán Coordinate Descent với hệ số phạt $\alpha = 0.1$, tỷ lệ điều chuẩn $\texttt{l1\_ratio} = 0.5$ (cân bằng giữa chuẩn $L_1$ và $L_2$), số vòng lặp tối đa $\texttt{max\_iter} = 2.000$, $\texttt{random\_state} = 42$.
+    \item \textbf{XGBoost:} Sử dụng số lượng cây $\texttt{n\_estimators} = 200$, độ sâu tối đa $\texttt{max\_depth} = 6$, tốc độ học $\texttt{learning\_rate} = 0.1$, tỷ lệ lấy mẫu dòng $\texttt{subsample} = 0.8$, tỷ lệ lấy mẫu cột $\texttt{colsample\_bytree} = 0.8$.
+\end{itemize}
+
+\paragraph{Quy trình Out-Of-Fold và tối ưu hóa mô hình tổng hợp (LightGBM):}
+Để ngăn ngừa hiện tượng rò rỉ dữ liệu khi huấn luyện mô hình cấp hai, ma trận dự báo OOF của ElasticNet và XGBoost trên tập huấn luyện được sinh ra bằng kỹ thuật \textit{TimeSeriesSplit} với $K = 3$ lượt chia kiểm chứng (\textit{folds}). Sau đó, mô hình tổng hợp LightGBM nhận đồng thời vector dự báo OOF và vector ngữ cảnh môi trường để học cách điều phối. Siêu tham số của LightGBM được tinh chỉnh tự động bằng Optuna~\cite{akiba2019optuna} với 15 lượt thử nghiệm (trials) trên không gian tìm kiếm: $\texttt{n\_estimators} \in [50, 250]$, $\texttt{max\_depth} \in [2, 6]$, $\texttt{learning\_rate} \in [0.01, 0.2]$, $\texttt{num\_leaves} \in [7, 31]$.
+
+\paragraph{Hàm mất mát:}
+Tất cả các mô hình cơ sở và mô hình tổng hợp đều tối thiểu hóa hàm mất mát sai số bình phương trung bình (MSE), hướng trực tiếp tới mục tiêu giảm chỉ số RMSE trong công tác quản lý và vận hành hệ thống điện.
+
+%------------------------------------------------------------------------------
+\subsection{Quy trình đánh giá và thước đo hiệu năng}
+\label{subsec:evaluation_metrics}
+
+\subsubsection{Các chỉ số sai số tiêu chuẩn}
+Hiệu năng dự báo phụ tải được đo lường đồng thời qua năm chỉ số định lượng tiêu chuẩn quốc tế (như trong các cuộc thi GEFCom~\cite{hong2014global, hong2016probabilistic}):
+\begin{align}
+    \text{RMSE} &= \sqrt{\frac{1}{N}\sum_{t=1}^N (y_t - \hat{y}_t)^2} \quad \text{(MW)} \\
+    \text{MAE} &= \frac{1}{N}\sum_{t=1}^N |y_t - \hat{y}_t| \quad \text{(MW)} \\
+    \text{MAPE} &= \frac{100\%}{N}\sum_{t=1}^N \left|\frac{y_t - \hat{y}_t}{y_t}\right| \\
+    \text{sMAPE} &= \frac{100\%}{N}\sum_{t=1}^N \frac{|y_t - \hat{y}_t|}{(|y_t| + |\hat{y}_t|)/2} \\
+    R^2 &= 1 - \frac{\sum_{t=1}^N (y_t - \hat{y}_t)^2}{\sum_{t=1}^N (y_t - \bar{y})^2}
+\end{align}
+trong đó $y_t$ là phụ tải thực tế, $\hat{y}_t$ là phụ tải dự báo tại giờ $t$, $\bar{y}$ là phụ tải trung bình của tập kiểm tra, và $N = 8.760$ giờ. Chỉ số sMAPE (Symmetric MAPE) được bổ sung nhằm khắc phục hạn chế bất đối xứng của MAPE khi phụ tải thực tế ở mức thấp, bảo đảm đánh giá công bằng và đa chiều cho mô hình.
+
+\subsubsection{Đánh giá sai số theo 8 điều kiện vận hành}
+Để kiểm chứng năng lực thích ứng theo ngữ cảnh của CAS, tập kiểm tra 8.760 giờ được phân rã thành 8 điều kiện vận hành thực tế:
+\begin{enumerate}
+    \item \textbf{Ban đêm tải thấp (00:00 -- 06:00):} 2.190 giờ có phụ tải ổn định ở mức thấp, kiểm tra khả năng dự báo của mô hình tuyến tính.
+    \item \textbf{Sóng nhiệt mùa hè ($\text{CDD} > 3^\circ\text{C}$):} 2.196 giờ áp lực nhiệt cực đoan, kiểm tra khả năng phân tách phi tuyến của mô hình cây.
+    \item \textbf{Mùa đông cần sưởi ($\text{HDD} > 5^\circ\text{C}$):} 1.798 giờ thời tiết lạnh có nhu cầu sưởi ấm.
+    \item \textbf{Thời tiết ôn hòa ($\text{HDD} \le 1^\circ\text{C} \wedge \text{CDD} \le 1^\circ\text{C}$):} 1.236 giờ nhiệt độ dễ chịu ($17\text{--}19^\circ\text{C}$), phụ tải ở trạng thái cân bằng.
+    \item \textbf{Giờ cao điểm chiều tối (15:00 -- 19:00):} 1.825 giờ nhu cầu điện sinh hoạt và thương mại đạt đỉnh.
+    \item \textbf{Giờ nắng trưa mặt trời (10:00 -- 14:00):} 1.825 giờ có bức xạ mặt trời cao nhất, chịu ảnh hưởng của hiện tượng giảm tải ròng.
+    \item \textbf{Ngày làm việc trong tuần (Thứ 2 -- Thứ 6):} 6.240 giờ có chu kỳ sinh hoạt công nghiệp và văn phòng ổn định.
+    \item \textbf{Ngày cuối tuần và ngày lễ:} 2.760 giờ cuối tuần và ngày nghỉ lễ (gồm 2.520 giờ thứ Bảy, Chủ nhật và 240 giờ nghỉ lễ liên bang rơi vào ngày trong tuần) có hình thái tiêu thụ phân tán.
+\end{enumerate}
+
