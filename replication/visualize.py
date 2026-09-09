@@ -64,7 +64,7 @@ def plot_fig4_weekdays_vs_weekends(train_df: pd.DataFrame, output_dir: str):
     ax.plot(time_index, sample_df['Load'], color='#1f77b4', label='Load', linewidth=1.2)
     weekend_mask = sample_df['Is_Weekend'] == 1
     ax.scatter(time_index[weekend_mask], sample_df.loc[weekend_mask, 'Load'], color='#d62728', s=12, label='Weekends', zorder=5)
-    ax.set_title('Figure 4: Weekdays vs Weekends from Load data')
+    ax.set_title('Phụ tải ngày trong tuần so với ngày cuối tuần (Weekdays vs. Weekends)', fontweight='bold')
     ax.set_xlabel('Date')
     ax.set_ylabel('Load (MW)')
     ax.legend(loc='upper right')
@@ -80,7 +80,7 @@ def plot_fig6_final_forecast(test_df: pd.DataFrame, y3_preds: np.ndarray, output
     fig, ax = plt.subplots(figsize=(12, 5))
     y3_time = test_df['Date'] + pd.to_timedelta(test_df['Hour'] - 1, unit='h')
     ax.plot(y3_time, y3_preds, color='blue', linewidth=0.9, label='Load Forecast')
-    ax.set_title('Figure 6: Final Forecast (Year 3 / 2022)')
+    ax.set_title('Dự báo phụ tải cả năm trên tập kiểm thử Năm 3 (Năm 2022)', fontweight='bold')
     ax.set_xlabel('Date')
     ax.set_ylabel('Load (MW)')
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))
@@ -99,8 +99,8 @@ def plot_fig7_monthly_forecast(test_df: pd.DataFrame, y3_preds: np.ndarray, outp
     df_plot = df_plot.sort_values('DateTime').reset_index(drop=True)
     df_plot['MA24'] = df_plot['Pred_Load'].rolling(window=24, min_periods=1, center=True).mean()
 
-    month_names = ['January', 'February', 'March', 'April', 'May', 'June',
-                   'July', 'August', 'September', 'October', 'November', 'December']
+    month_names = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+                   'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12']
     fig, axes = plt.subplots(4, 3, figsize=(14, 12), sharey=True)
     axes = axes.flatten()
 
@@ -115,7 +115,7 @@ def plot_fig7_monthly_forecast(test_df: pd.DataFrame, y3_preds: np.ndarray, outp
         ax.grid(True, linestyle='--', alpha=0.4)
         if m == 1: ax.legend(loc='upper right', fontsize=7)
 
-    fig.suptitle('Figure 7: Final Forecast by Month (with 24-hour Moving Average in Red)', fontsize=13, y=0.995)
+    fig.suptitle('Đường cong dự báo phụ tải chi tiết 12 tháng (kèm đường trung bình trượt 24 giờ)', fontsize=13, y=0.995, fontweight='bold')
     plt.tight_layout()
     plt.savefig(os.path.join(output_dir, 'Figure_7_Final_Forecast_by_Month.png'), dpi=300)
     plt.close(fig)

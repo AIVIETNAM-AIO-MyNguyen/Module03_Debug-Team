@@ -32,6 +32,25 @@ class PCAExogenousTransformer:
         self.fit(df)
         return self.transform(df)
 
+    def get_explained_variance(self) -> dict[str, float]:
+        if not self.is_fitted:
+            raise RuntimeError("Transformer must be fitted first.")
+        return {
+            'PCA_Temp': float(self.pca_temp.explained_variance_ratio_[0]),
+            'PCA_GHI': float(self.pca_ghi.explained_variance_ratio_[0])
+        }
+
+
+def compute_vif(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
+    """
+    Computes Variance Inflation Factor (VIF) replicating Table 2 & Table 3 of Roy et al. (2025)
+    using statsmodels variance_inflation_factor with unstandardized features.
+    """
+    from statsmodels.stats.outliers_influence import variance_inflation_factor
+    sub = df[features].dropna()
+    vifs = [variance_inflation_factor(sub.values, i, standardize=False) for i in range(sub.shape[1])]
+    return pd.DataFrame({'Feature': features, 'VIF': vifs})
+
 
 def add_lag_lead_features(df: pd.DataFrame, lags: list[int] = None, leads: list[int] = None) -> pd.DataFrame:
     df = df.copy()

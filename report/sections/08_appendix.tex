@@ -18,7 +18,7 @@ Phần phụ lục này cung cấp thông tin đối chiếu kỹ thuật chi ti
         \item \textbf{Lê Tiến Anh} (Kỹ thuật trích xuất đặc trưng vật lý \& Phân tích đa cộng tuyến PCA).
         \item \textbf{Nguyễn Mạnh Tân} (Tái hiện mô hình cơ sở Roy et al. \& Xây dựng đường ống kiểm thử).
         \item \textbf{Hoàng Nguyễn Nhật Minh} (Phát triển mô hình Stacking theo ngữ cảnh \& Tối ưu hóa siêu tham số).
-        \item \textbf{Lê Minh Hoàng} (Phân tích giải thích mô hình SHAP, Conformal Prediction \& Trực quan hóa dữ liệu).
+        \item \textbf{Lê Minh Hoàng} (Phân tích giải thích mô hình SHAP \& Trực quan hóa dữ liệu).
     \end{enumerate}
 \end{itemize}
 
@@ -36,7 +36,7 @@ Toàn bộ mã nguồn nghiên cứu, kịch bản thực thi và tài liệu b�
     \item \texttt{src/}: Mã nguồn cốt lõi của giải pháp CAS đề xuất:
     \begin{itemize}
         \item \texttt{feature\_engineering.py}: Mô-đun trích xuất CDD/HDD ($18^\circ\text{C}$), sóng Fourier và PCA giảm chiều ngoại sinh.
-        \item \texttt{models/}: Triển khai kiến trúc \texttt{ContextAwareStackingForecaster}, \texttt{HourlyXGBoostForecaster} và \texttt{SingleXGBoostForecaster}.
+        \item \texttt{models/}: Triển khai kiến trúc CAS và các mô hình đối chuẩn (\texttt{CAS}, \texttt{24-XGBoost}, \texttt{SingleXGBoost}).
         \item \texttt{explainability/}: Mô-đun phân tích tầm quan trọng đặc trưng SHAP theo 24 khung giờ.
         \item \texttt{visualization/}: Mô-đun trực quan hóa dữ liệu chuẩn xuất bản khoa học.
     \end{itemize}
@@ -48,10 +48,8 @@ Toàn bộ mã nguồn nghiên cứu, kịch bản thực thi và tài liệu b�
 
 \textbf{Lệnh tái hiện kết quả trong 1 bước:}
 \begin{verbatim}
-    # Cài đặt các gói phụ thuộc
-    pip install -r requirements.txt
-    # Chạy toàn bộ đường ống thực nghiệm và trích xuất bảng kết quả
-    python run_extended_experiments.py
+pip install -r requirements.txt
+python run_extended_experiments.py
 \end{verbatim}
 
 % =============================================================================
@@ -65,14 +63,14 @@ Bộ dữ liệu sử dụng trong bài báo có nguồn gốc từ cuộc thi h
     \item \textbf{Định danh truy cập mở (DOI):} \url{https://doi.org/10.5281/zenodo.17085273}.
     \item \textbf{Kích thước dữ liệu:} 3 năm liên tục với chu kỳ 1 giờ/mẫu ($26.304$ mốc giờ):
     \begin{itemize}
-        \item \textit{Tập huấn luyện (Năm 1 và Năm 2):} 17.520 mốc giờ, đầy đủ thông tin thời tiết và phụ tải thực tế ($\text{MW}$).
+        \item \textit{Tập huấn luyện (Năm 1 và Năm 2):} 17.544 mốc giờ (gồm 8.784 giờ của năm nhuận 2020 và 8.760 giờ của năm 2021), đầy đủ thông tin thời tiết và phụ tải thực tế ($\text{MW}$).
         \item \textit{Tập kiểm tra độc lập (Năm 3):} 8.760 mốc giờ kiểm tra độc lập trong bối cảnh thực tế.
     \end{itemize}
     \item \textbf{Danh mục trường dữ liệu:} \texttt{Year}, \texttt{Month}, \texttt{Day}, \texttt{Hour}, \texttt{Load} (MW), 5 chuỗi nhiệt độ bề mặt (\texttt{Site-1 Temp} $\ldots$ \texttt{Site-5 Temp}), và 5 chuỗi bức xạ mặt trời trực tiếp (\texttt{Site-1 GHI} $\ldots$ \texttt{Site-5 GHI}).
 \end{itemize}
 
 % =============================================================================
-\subsection*{Phụ lục 4: Cấu hình thực nghiệm và Siêu tham số (Experiment Configuration)}
+\subsection*{Phụ lục 4: Cấu hình thực nghiệm và Siêu tham số}
 \label{subsec:appendix_hyperparameters}
 
 Bảng~\ref{tab:appendix_hyperparameters} tóm tắt cấu hình siêu tham số chi tiết của các mô hình trong kiến trúc CAS đề xuất và các đường ống đối chuẩn.
@@ -80,11 +78,12 @@ Bảng~\ref{tab:appendix_hyperparameters} tóm tắt cấu hình siêu tham số
 \begin{table}[H]
 \centering
 \small
+\hbadness=10000
 \caption{Chi tiết cấu hình siêu tham số của các thuật toán trong nghiên cứu}
 \label{tab:appendix_hyperparameters}
 \setlength{\tabcolsep}{6pt}
 \renewcommand{\arraystretch}{1.15}
-\begin{tabularx}{\linewidth}{@{} l X l @{}}
+\begin{tabularx}{\linewidth}{@{} l >{\RaggedRight\arraybackslash}X l @{}}
 \toprule
 \textbf{Mô hình} & \textbf{Tham số kỹ thuật} & \textbf{Giá trị thiết lập} \\
 \midrule
@@ -122,21 +121,21 @@ Bảng~\ref{tab:seasonal_breakdown} trình bày chi tiết hiệu năng của m�
 
 \begin{table}[H]
 \centering
-\small
+\footnotesize
 \caption{Độ chính xác dự báo của mô hình CAS phân rã theo 4 mùa trên tập kiểm tra Năm 3 (2022)}
 \label{tab:seasonal_breakdown}
-\setlength{\tabcolsep}{8pt}
+\setlength{\tabcolsep}{3.8pt}
 \renewcommand{\arraystretch}{1.15}
-\begin{tabularx}{\linewidth}{@{} l c c c c c @{}}
+\begin{tabularx}{\linewidth}{@{} >{\RaggedRight\arraybackslash}X c c c c c c @{}}
 \toprule
-\textbf{Mùa trong năm} & \textbf{Số giờ} & \textbf{RMSE (MW)} $\downarrow$ & \textbf{MAE (MW)} $\downarrow$ & \textbf{MAPE (\%)} $\downarrow$ & $\mathbf{R^2}$ $\uparrow$ \\
+\textbf{Mùa trong năm} & \textbf{Số giờ} & \textbf{RMSE (MW)} $\downarrow$ & \textbf{MAE (MW)} $\downarrow$ & \textbf{MAPE (\%)} $\downarrow$ & \textbf{sMAPE (\%)} $\downarrow$ & $\mathbf{R^2}$ $\uparrow$ \\
 \midrule
-Mùa Đông (Tháng 12, 1, 2) & 2.160 & \textbf{114.55} & \textbf{84.86} & \textbf{4.15\%} & 0.8658 \\
-Mùa Xuân (Tháng 3, 4, 5) & 2.208 & 140.59 & 99.56 & 5.74\% & 0.8216 \\
-Mùa Hè (Tháng 6, 7, 8) & 2.208 & 143.85 & 107.23 & 4.58\% & \textbf{0.9103} \\
-Mùa Thu (Tháng 9, 10, 11) & 2.184 & 187.45 & 136.13 & 5.47\% & 0.8834 \\
+Mùa Đông (Tháng 12, 1, 2) & 2.160 & \textbf{114.55} & \textbf{84.86} & \textbf{4.15\%} & \textbf{4.14\%} & 0.8658 \\
+Mùa Xuân (Tháng 3, 4, 5) & 2.208 & 140.59 & 99.56 & 5.74\% & 5.51\% & 0.8216 \\
+Mùa Hè (Tháng 6, 7, 8) & 2.208 & 143.85 & 107.23 & 4.58\% & 4.51\% & \textbf{0.9103} \\
+Mùa Thu (Tháng 9, 10, 11) & 2.184 & 187.45 & 136.13 & 5.47\% & 5.58\% & 0.8834 \\
 \midrule
-\textbf{Cả năm 2022 (Tổng thể)} & \textbf{8.760} & \textbf{141.81} & \textbf{106.98} & \textbf{4.75\%} & \textbf{0.9136} \\
+\textbf{Cả năm 2022 (Tổng thể)} & \textbf{8.760} & \textbf{141.81} & \textbf{106.98} & \textbf{4.75\%} & \textbf{4.71\%} & \textbf{0.9136} \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -146,7 +145,7 @@ Số liệu cho thấy mô hình CAS đạt độ chính xác cao nhất vào m�
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.96\linewidth]{figures/Figure_7_Final_Forecast_by_Month.png}
-\caption{Đường cong dự báo phụ tải chi tiết theo từng giờ cho trọn vẹn 12 tháng trong Năm 3 (2022) của mô hình đề xuất CAS (đường màu xanh) và đường trung bình trượt 24 giờ (đường màu đỏ).}
+\caption{Đường cong dự báo phụ tải chi tiết theo từng giờ qua 12 tháng của tập kiểm tra Năm 3.}
 \label{fig:monthly_forecast}
 \end{figure}
 
@@ -159,20 +158,20 @@ Hình~\ref{fig:monthly_forecast} minh họa trực quan 12 khung hình dự báo
 Toàn bộ kết quả dự báo và tệp nhật ký thực thi được đóng gói hoàn chỉnh trong thư mục \texttt{output/}:
 \begin{itemize}
     \item \texttt{predictions\_xgboost.xlsx} và \texttt{predictions\_xgboost.csv}: Chứa đầy đủ 8.760 dòng kết quả dự báo phụ tải từng giờ của Năm 3, bao gồm mốc thời gian, giá trị phụ tải thực tế, giá trị dự báo CAS và sai số lệch tuyệt đối.
-    \item \texttt{results\_master\_paper\_comparison.csv}: Bảng tổng hợp đối chuẩn hiệu năng giữa 5 cấu hình mô hình qua 3 giao thức đánh giá.
+    \item \texttt{results\_master\_paper\_comparison.csv}: Bảng tổng hợp đối chuẩn hiệu năng giữa 5 cấu hình mô hình qua 3 kịch bản đánh giá.
     \item \texttt{results\_conditional\_regime\_errors.csv}: Bảng phân tích sai số RMSE chi tiết theo 8 điều kiện vận hành và thời tiết thực tế.
     \item \texttt{results\_residual\_correlation.csv}: Ma trận tương quan Pearson phần dư giữa các mô hình thành phần.
     \item \texttt{shap\_importance\_by\_hour.csv}: Bảng giá trị đóng góp trung bình |SHAP| của từng biến cho 24 mô hình theo giờ.
 \end{itemize}
 
 % =============================================================================
-\subsection*{Phụ lục 7: Slide thuyết trình và Báo cáo nghiệm thu (Presentation)}
+\subsection*{Phụ lục 7: Slide thuyết trình và Báo cáo nghiệm thu}
 \label{subsec:appendix_presentation}
 
 \begin{itemize}
-    \item \textbf{Slide báo cáo nghiệm thu:} Bộ slide thuyết trình đồ án Module 03 định dạng PDF/PowerPoint được lưu trữ trực tiếp tại kho mã nguồn dự án:
+    \item \textbf{Slide báo cáo:} Bộ slide thuyết trình đồ án Module 03 định dạng PDF được lưu trữ tại kho mã nguồn dự án:
     \begin{center}
-        \texttt{report/presentation\_Module03\_DebugTeam.pdf}
+        \texttt{presentation\_Module03\_DebugTeam.pdf}
     \end{center}
     \item \textbf{Nội dung slide:} Tóm tắt 15 trang trực quan gồm: Bối cảnh STLF, Phân tích bài báo gốc, Điểm nghẽn kỹ thuật, Kiến trúc CAS, Bằng chứng thực nghiệm hai chế độ vận hành (Dual-Regime), Đánh giá kinh tế (\$5.0--\$7.6M/năm) và Demo kiểm chứng.
     \item \textbf{Thông tin liên hệ nhóm:} Mọi thắc mắc học thuật và yêu cầu trao đổi chuyên môn xin gửi về đại diện nhóm nghiên cứu qua email học thuật: \texttt{s4053063@rmit.edu.vn} hoặc kênh hỗ trợ học tập của AI VIET NAM.

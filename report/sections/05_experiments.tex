@@ -10,7 +10,7 @@ Phần này trình bày chi tiết quy trình xử lý dữ liệu, tập đặc
 \subsubsection{Nguồn dữ liệu và phân chia tập mẫu}
 Dữ liệu sử dụng trong nghiên cứu này bắt nguồn từ cuộc thi \textit{IISE PG\&E Energy Analytics Challenge 2025}~\cite{pge2025zenodo}, phản ánh phụ tải điện thực tế của lưới điện Pacific Gas and Electric Company (Bắc California) trong ba năm liên tục (2020--2022) với tần suất đo 1 giờ một lần:
 \begin{itemize}
-    \item \textbf{Tập huấn luyện (Training Set):} Gồm Năm~1 (2020) và Năm~2 (2021) với tổng cộng $8.760 \times 2 = 17.520$ mốc giờ quan sát. Tập này chứa đầy đủ biến phụ tải thực tế ($\texttt{Load}$, đơn vị MW), thông tin thời gian và 10 chuỗi biến ngoại sinh từ 5 trạm quan trắc khí tượng ($\texttt{Site-1}\ldots\texttt{Site-5}$ về nhiệt độ và bức xạ mặt trời GHI).
+    \item \textbf{Tập huấn luyện (Training Set):} Gồm Năm~1 (năm nhuận 2020 gồm $8.784$ giờ) và Năm~2 (2021 gồm $8.760$ giờ) với tổng cộng $17.544$ mốc giờ quan sát. Tập này chứa đầy đủ biến phụ tải thực tế ($\texttt{Load}$, đơn vị MW), thông tin thời gian và 10 chuỗi biến ngoại sinh từ 5 trạm quan trắc khí tượng ($\texttt{Site-1}\ldots\texttt{Site-5}$ về nhiệt độ và bức xạ mặt trời GHI).
     \item \textbf{Tập kiểm tra độc lập (Hold-out Test Set):} Gồm toàn bộ Năm~3 (2022) với 8.760 mốc giờ quan sát. Đây là tập dữ liệu kiểm tra độc lập dùng để đánh giá cuối cùng, phản ánh đúng kịch bản vận hành thực tế khi hệ thống phải dự báo phụ tải cho cả năm tiếp theo mà không có giá trị phụ tải thực tế phản hồi theo thời gian thực.
 \end{itemize}
 
@@ -19,7 +19,7 @@ Quy trình tiền xử lý được chuẩn hóa theo các bước:
 \begin{enumerate}
     \item \textbf{Ánh xạ thời gian thực:} Biến định danh $\texttt{Year} \in \{1, 2, 3\}$ được ánh xạ về năm dương lịch $\{2020, 2021, 2022\}$ để trích xuất chính xác ngày thứ bao nhiêu trong năm ($\text{DOY} \in [1, 366]$), có tính đến năm nhuận 2020.
     \item \textbf{Mã hóa lịch biểu và ngày lễ:} Xây dựng biến nhị phân $\texttt{Is\_Weekend}$ (Thứ 7 và Chủ nhật) cùng biến $\texttt{Is\_Holiday}$ đối chiếu theo danh mục 35 ngày nghỉ lễ liên bang Hoa Kỳ trong giai đoạn 2020--2022 (bao gồm Memorial Day, Independence Day, Labor Day, Thanksgiving, Christmas,...).
-    \item \textbf{Xử lý giá trị biên khi tạo biến trễ:} Việc tạo biến trễ $\text{Lag1}$ làm khuyết giá trị tại thời điểm đầu tiên của chuỗi, do đó phương pháp điền biên \texttt{bfill} (backfill) và \texttt{ffill} (forward-fill) được áp dụng tại điểm đầu chuỗi để bảo toàn nguyên vẹn 17.520 mẫu huấn luyện và 8.760 mẫu kiểm tra mà không làm rò rỉ thông tin tương lai.
+    \item \textbf{Xử lý giá trị biên khi tạo biến trễ thời tiết:} Việc tạo các biến trễ động học $\text{Lag1}$ cho thời tiết ($\text{PCA\_Temp\_Lag1}$ và $\text{PCA\_GHI\_Lag1}$) làm khuyết giá trị tại thời điểm đầu tiên của chuỗi, do đó phương pháp điền biên \texttt{bfill} (backfill) và \texttt{ffill} (forward-fill) được áp dụng tại điểm đầu chuỗi để bảo toàn nguyên vẹn 17.544 mẫu huấn luyện và 8.760 mẫu kiểm tra mà không làm rò rỉ thông tin tương lai. Lưu ý rằng bài toán dự báo phụ tải trọn vẹn một năm không có giá trị phụ tải thực tế phản hồi theo thời gian thực, do vậy mô hình hoàn toàn không sử dụng bất kỳ biến trễ phụ tải (\textit{Load Lag}) nào.
 \end{enumerate}
 
 \subsubsection{Tập đặc trưng 24 biến}
@@ -32,7 +32,7 @@ Từ dữ liệu thô, chúng tôi xây dựng tập đặc trưng gồm 24 bi�
 \end{itemize}
 
 %------------------------------------------------------------------------------
-\subsection{Các cấu hình thử nghiệm bóc tách (Ablation Configurations)}
+\subsection{Các cấu hình thử nghiệm bóc tách (Ablation)}
 \label{subsec:ablation_configs}
 
 Để xác định chính xác mức độ đóng góp của từng thành phần cải tiến (nhằm trả lời toàn diện các câu hỏi nghiên cứu RQ1, RQ2 và RQ3), nghiên cứu thiết lập bốn cấu hình thử nghiệm bóc tách tăng dần:
@@ -47,12 +47,12 @@ Từ dữ liệu thô, chúng tôi xây dựng tập đặc trưng gồm 24 bi�
 \subsection{Chiến lược huấn luyện và tối ưu siêu tham số}
 \label{subsec:training_strategy}
 
-\paragraph{Giao thức phân chia dữ liệu:}
-Để bảo đảm tính khái quát hóa và kiểm tra độ ổn định qua các năm, ba giao thức thực nghiệm được thực hiện:
+\paragraph{Kịch bản phân chia dữ liệu:}
+Để bảo đảm tính khái quát hóa và kiểm tra độ ổn định qua các năm, ba kịch bản thử nghiệm được thực hiện:
 \begin{itemize}
-    \item \textbf{Giao thức 1 (Năm 1 $\to$ Năm 2):} Huấn luyện trên Năm~1 (2020), kiểm tra trên Năm~2 (2021).
-    \item \textbf{Giao thức 2 (Năm 2 $\to$ Năm 1):} Huấn luyện trên Năm~2 (2021), kiểm tra trên Năm~1 (2020).
-    \item \textbf{Giao thức 3 (Kiểm tra độc lập Năm 3):} Huấn luyện trên Năm~1 + Năm~2 (17.520 giờ), kiểm tra độc lập trên Năm~3 (2022, gồm 8.760 giờ). Đây là thước đo đối chuẩn chính của nghiên cứu.
+    \item \textbf{Kịch bản 1 (Năm 1 $\to$ Năm 2):} Huấn luyện trên Năm~1 (2020), kiểm tra trên Năm~2 (2021).
+    \item \textbf{Kịch bản 2 (Năm 2 $\to$ Năm 1):} Huấn luyện trên Năm~2 (2021), kiểm tra trên Năm~1 (2020).
+    \item \textbf{Kịch bản 3 (Kiểm tra độc lập Năm 3):} Huấn luyện trên Năm~1 + Năm~2 (17.544 giờ), kiểm tra độc lập trên Năm~3 (2022, gồm 8.760 giờ). Đây là thước đo đối chuẩn chính của nghiên cứu.
 \end{itemize}
 
 \paragraph{Cấu hình mô hình cơ sở (Base Models):}
@@ -65,7 +65,7 @@ Từ dữ liệu thô, chúng tôi xây dựng tập đặc trưng gồm 24 bi�
 Để ngăn ngừa hiện tượng rò rỉ dữ liệu khi huấn luyện mô hình cấp hai, ma trận dự báo OOF của ElasticNet và XGBoost trên tập huấn luyện được sinh ra bằng kỹ thuật \textit{TimeSeriesSplit} với $K = 3$ lượt chia kiểm chứng (\textit{folds}). Sau đó, mô hình tổng hợp LightGBM nhận đồng thời vector dự báo OOF và vector ngữ cảnh môi trường để học cách điều phối. Siêu tham số của LightGBM được tinh chỉnh tự động bằng Optuna~\cite{akiba2019optuna} với 15 lượt thử nghiệm (trials) trên không gian tìm kiếm: $\texttt{n\_estimators} \in [50, 250]$, $\texttt{max\_depth} \in [2, 6]$, $\texttt{learning\_rate} \in [0.01, 0.2]$, $\texttt{num\_leaves} \in [7, 31]$.
 
 \paragraph{Hàm mất mát:}
-Tất cả các mô hình cơ sở và mô hình tổng hợp đều tối thiểu hóa hàm mất mát sai số bình phương trung bình (MSE), hướng trực tiếp tới mục tiêu giảm chỉ số RMSE trong điều độ hệ thống điện.
+Tất cả các mô hình cơ sở và mô hình tổng hợp đều tối thiểu hóa hàm mất mát sai số bình phương trung bình (MSE), hướng trực tiếp tới mục tiêu giảm chỉ số RMSE trong công tác quản lý và vận hành hệ thống điện.
 
 %------------------------------------------------------------------------------
 \subsection{Quy trình đánh giá và thước đo hiệu năng}
@@ -80,7 +80,7 @@ Hiệu năng dự báo phụ tải được đo lường đồng thời qua năm
     \text{sMAPE} &= \frac{100\%}{N}\sum_{t=1}^N \frac{|y_t - \hat{y}_t|}{(|y_t| + |\hat{y}_t|)/2} \\
     R^2 &= 1 - \frac{\sum_{t=1}^N (y_t - \hat{y}_t)^2}{\sum_{t=1}^N (y_t - \bar{y})^2}
 \end{align}
-trong đó $y_t$ là phụ tải thực tế, $\hat{y}_t$ là phụ tải dự báo tại giờ $t$, $\bar{y}$ là phụ tải trung bình của tập kiểm tra, và $N = 8.760$ giờ.
+trong đó $y_t$ là phụ tải thực tế, $\hat{y}_t$ là phụ tải dự báo tại giờ $t$, $\bar{y}$ là phụ tải trung bình của tập kiểm tra, và $N = 8.760$ giờ. Chỉ số sMAPE (Symmetric MAPE) được bổ sung nhằm khắc phục hạn chế bất đối xứng của MAPE khi phụ tải thực tế ở mức thấp, bảo đảm đánh giá công bằng và đa chiều cho mô hình.
 
 \subsubsection{Đánh giá sai số theo 8 điều kiện vận hành}
 Để kiểm chứng năng lực thích ứng theo ngữ cảnh của CAS, tập kiểm tra 8.760 giờ được phân rã thành 8 điều kiện vận hành thực tế:
@@ -92,9 +92,6 @@ trong đó $y_t$ là phụ tải thực tế, $\hat{y}_t$ là phụ tải dự b
     \item \textbf{Giờ cao điểm chiều tối (15:00 -- 19:00):} 1.825 giờ nhu cầu điện sinh hoạt và thương mại đạt đỉnh.
     \item \textbf{Giờ nắng trưa mặt trời (10:00 -- 14:00):} 1.825 giờ có bức xạ mặt trời cao nhất, chịu ảnh hưởng của hiện tượng giảm tải ròng.
     \item \textbf{Ngày làm việc trong tuần (Thứ 2 -- Thứ 6):} 6.240 giờ có chu kỳ sinh hoạt công nghiệp và văn phòng ổn định.
-    \item \textbf{Ngày cuối tuần và ngày lễ:} 2.520 giờ cuối tuần và ngày nghỉ có hình thái tiêu thụ phân tán.
+    \item \textbf{Ngày cuối tuần và ngày lễ:} 2.760 giờ cuối tuần và ngày nghỉ lễ (gồm 2.520 giờ thứ Bảy, Chủ nhật và 240 giờ nghỉ lễ liên bang rơi vào ngày trong tuần) có hình thái tiêu thụ phân tán.
 \end{enumerate}
-
-\subsubsection{Kiểm định ý nghĩa thống kê Diebold-Mariano}
-Nhằm khẳng định sự vượt trội của mô hình đề xuất không phải do ngẫu nhiên, nghiên cứu áp dụng kiểm định thống kê Diebold-Mariano (\textit{DM test}) so sánh chuỗi tổn thất sai số bình phương giữa mô hình CAS và mô hình Paper Baseline trên toàn bộ 8.760 bước thời gian liên tục. Thống kê kiểm định đạt giá trị $t_{\text{DM}} > 8.5$ với mức ý nghĩa $p < 10^{-5}$, bác bỏ giả thuyết $H_0$ và chứng minh mô hình CAS vượt trội có ý nghĩa thống kê áp đảo so với bài báo gốc.
 

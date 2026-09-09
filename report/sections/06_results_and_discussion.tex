@@ -4,21 +4,22 @@
 Phần này tổng hợp toàn bộ kết quả thực nghiệm trên tập dữ liệu kiểm tra Năm~3 (năm 2022, gồm 8.760 giờ) của lưới điện PG\&E, đồng thời phân tích cơ chế hoạt động và nguyên nhân tạo nên sự cải thiện của mô hình đề xuất. Mọi so sánh đều được thực hiện trên cùng một tập dữ liệu và tuân thủ đúng quy trình đánh giá chuẩn từ bài báo gốc~\cite{roy2025hourly} nhằm bảo đảm tính khách quan và công bằng.
 
 % =========================================================================
-\subsection{Tái hiện kết quả bài báo gốc (Baseline Replication)}
+\subsection{Tái hiện kết quả bài báo gốc}
 \label{sec:replicate_result}
 
-Nhằm thiết lập nền tảng đối chuẩn vững chắc và bảo đảm tính tái lập khoa học, nhóm nghiên cứu đã xây dựng lại toàn bộ quy trình xử lý dữ liệu và huấn luyện mô hình 24-Hourly XGBoost theo đúng phương pháp công bố của Roy và cộng sự~\cite{roy2025hourly}. Quá trình tái hiện được kiểm chứng trên ba giao thức phân chia dữ liệu (Năm~1 $\to$ Năm~2, Năm~2 $\to$ Năm~1, kiểm định chéo 5-Fold CV) và trên tập kiểm tra độc lập Năm~3 (2022). Bảng~\ref{tab:replication_comparison} đối chiếu chi tiết giữa kết quả công bố trong bài báo gốc và kết quả tái hiện độc lập của nhóm.
+Nhằm thiết lập nền tảng đối chuẩn vững chắc và bảo đảm tính tái lập khoa học, nhóm nghiên cứu đã xây dựng lại toàn bộ quy trình xử lý dữ liệu và huấn luyện mô hình 24-Hourly XGBoost theo đúng phương pháp công bố của Roy và cộng sự~\cite{roy2025hourly}. Quá trình tái hiện được kiểm chứng trên ba kịch bản phân chia dữ liệu (Năm~1 $\to$ Năm~2, Năm~2 $\to$ Năm~1, kiểm định chéo 5-Fold CV) và trên tập kiểm tra độc lập Năm~3 (2022). Bảng~\ref{tab:replication_comparison} đối chiếu chi tiết giữa kết quả công bố trong bài báo gốc và kết quả tái hiện độc lập của nhóm.
 
 \begin{table}[H]
 \centering
-\small
+\footnotesize
+\hbadness=10000
 \caption{Đối chiếu kết quả tái hiện mô hình 24-Hourly XGBoost với bài báo gốc của Roy et al.~\cite{roy2025hourly}}
 \label{tab:replication_comparison}
-\setlength{\tabcolsep}{4.5pt}
+\setlength{\tabcolsep}{3.2pt}
 \renewcommand{\arraystretch}{1.15}
-\begin{tabularx}{\linewidth}{@{} l X c c c c c @{}}
+\begin{tabularx}{\linewidth}{@{} l >{\RaggedRight\arraybackslash}X c c c c c @{}}
 \toprule
-\textbf{Giao thức thử nghiệm} & \textbf{Cấu hình mô hình} & \makecell{\textbf{Số}\\\textbf{biến}} & \makecell{\textbf{Bài báo gốc}\\\textbf{RMSE (MW)}} & \makecell{\textbf{Nhóm tái hiện}\\\textbf{RMSE (MW)}} & \makecell{\textbf{Độ lệch}\\\textbf{$\Delta$ RMSE}} & \makecell{\textbf{Tỷ lệ lệch}\\\textbf{(\%)}} \\
+\textbf{Kịch bản thử nghiệm} & \textbf{Cấu hình mô hình} & \makecell{\textbf{Số}\\\textbf{biến}} & \makecell{\textbf{Bài báo gốc}\\\textbf{RMSE (MW)}} & \makecell{\textbf{Nhóm tái hiện}\\\textbf{RMSE (MW)}} & \makecell{\textbf{Độ lệch}\\\textbf{$\Delta$ RMSE}} & \makecell{\textbf{Tỷ lệ lệch}\\\textbf{(\%)}} \\
 \midrule
 Năm 1 $\to$ Năm 2 & Baseline gốc (chưa biến trễ) & 16 & 159.70 & 157.74 & $-1.96$ & $-1.23\%$ \\
 Năm 1 $\to$ Năm 2 & XGBoost + PCA Lag 1 & 18 & 160.61 & 160.81 & $+0.20$ & $+0.12\%$ \\
@@ -26,15 +27,14 @@ Năm 2 $\to$ Năm 1 & XGBoost + PCA Lag 1 & 18 & 177.64 & 180.19 & $+2.55$ & $+1
 5-Fold CV (Năm 1+2) & XGBoost + PCA Lag 1 & 18 & 255.59 & 255.55 & $-0.04$ & $-0.01\%$ \\
 \midrule
 \textbf{Kiểm tra Năm 3 (2022)} & \textbf{Paper Baseline (Cuối cùng)} & \textbf{18} & \textbf{170.84} & \textbf{171.66} & \textbf{$+0.82$} & \textbf{$+0.48\%$} \\
-Kiểm tra Năm 3 (2022) & MAPE (\%) / Hệ số $R^2$ & 18 & 5.38\% / 0.8746 & 5.41\% / 0.8734 & $+0.03\%$ & -- \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 Số liệu ở Bảng~\ref{tab:replication_comparison} xác nhận độ tương đồng rất cao giữa kết quả thực nghiệm của nhóm và bài báo gốc:
 \begin{itemize}
-    \item Trên tập kiểm tra độc lập Năm~3 (8.760 giờ), sai số RMSE của mô hình tái hiện đạt $171.66\text{ MW}$ (so với $170.84\text{ MW}$ công bố của bài báo gốc), độ lệch chỉ $0.82\text{ MW}$ (tương đương $0.48\%$). Hệ số xác định $R^2$ đạt $0.8734$ (so với $0.8746$) và MAPE đạt $5.41\%$ (so với $5.38\%$).
-    \item Trên các giao thức kiểm chứng chéo, sai số lệch giữa hai bên cũng rất nhỏ: độ lệch trên giao thức Năm~1 $\to$ Năm~2 chỉ là $0.20\text{ MW}$ ($0.12\%$) và trên 5-Fold CV chỉ là $0.04\text{ MW}$ ($0.01\%$).
+    \item Trên tập kiểm tra độc lập Năm~3 (8.760 giờ), sai số RMSE của mô hình tái hiện đạt $171.66\text{ MW}$ (so với $170.84\text{ MW}$ công bố của bài báo gốc), độ lệch chỉ $0.82\text{ MW}$ (tương đương $0.48\%$). Các chỉ số tương ứng khác cũng bám sát tuyệt đối: hệ số xác định $R^2$ đạt $0.8734$ (so với $0.8746$), MAPE đạt $5.41\%$ (so với $5.38\%$), và sMAPE đạt $5.48\%$ (so với $5.46\%$).
+    \item Trên các kịch bản kiểm chứng chéo, sai số lệch giữa hai bên cũng rất nhỏ: độ lệch trên kịch bản Năm~1 $\to$ Năm~2 chỉ là $0.20\text{ MW}$ ($0.12\%$) và trên 5-Fold CV chỉ là $0.04\text{ MW}$ ($0.01\%$).
 \end{itemize}
 Sự chênh lệch nhỏ này nằm trong biên độ dao động ngẫu nhiên của thuật toán tối ưu hóa siêu tham số Optuna. Kết quả đối chiếu này khẳng định nhóm đã tái hiện chuẩn xác quy trình kỹ thuật của bài báo gốc, tạo điểm tựa tin cậy cho việc phát triển các cải tiến tiếp theo.
 
@@ -48,22 +48,23 @@ Sự chênh lệch nhỏ này nằm trong biên độ dao động ngẫu nhiên 
 
 \begin{table}[H]
 \centering
-\small
+\footnotesize
+\hbadness=10000
 \caption{So sánh hiệu năng dự báo phụ tải trên tập kiểm tra Năm 3 (2022)}
 \label{tab:master_comparison}
-\setlength{\tabcolsep}{5pt}
+\setlength{\tabcolsep}{3.0pt}
 \renewcommand{\arraystretch}{1.15}
-\begin{tabularx}{\linewidth}{@{} l X c c c c c @{}}
+\begin{tabularx}{\linewidth}{@{} l >{\RaggedRight\arraybackslash}X c c c c c c @{}}
 \toprule
-\textbf{Cấu hình mô hình} & \textbf{Kiến trúc / Đặc trưng} & \makecell{\textbf{Số}\\\textbf{biến}} & \makecell{\textbf{RMSE}\\\textbf{(MW)} $\downarrow$} & \makecell{\textbf{MAE}\\\textbf{(MW)} $\downarrow$} & \makecell{\textbf{MAPE}\\\textbf{(\%)} $\downarrow$} & $\mathbf{R^2}$ $\uparrow$ \\
+\textbf{Cấu hình mô hình} & \textbf{Kiến trúc / Đặc trưng} & \makecell{\textbf{Số}\\\textbf{biến}} & \makecell{\textbf{RMSE}\\\textbf{(MW)} $\downarrow$} & \makecell{\textbf{MAE}\\\textbf{(MW)} $\downarrow$} & \makecell{\textbf{MAPE}\\\textbf{(\%)} $\downarrow$} & \makecell{\textbf{sMAPE}\\\textbf{(\%)} $\downarrow$} & $\mathbf{R^2}$ $\uparrow$ \\
 \midrule
-Paper Baseline (Công bố)~\cite{roy2025hourly} & 24 mô hình XGBoost theo giờ & 18 & 170.84 & 120.77 & 5.38\% & 0.8746 \\
-Paper Baseline (Tái hiện) & 24 mô hình XGBoost theo giờ & 18 & 171.66 & 120.77 & 5.41\% & 0.8734 \\
-Feature-Enhanced & 24 mô hình XGBoost (+Fourier, CDD/HDD~\cite{quayle1980heating}) & 24 & 160.80 & 114.74 & 5.14\% & 0.8889 \\
-Standalone ElasticNet & Hồi quy tuyến tính toàn cục~\cite{zou2005regularization} & 24 & 207.46 & 156.32 & 6.92\% & 0.8150 \\
-Standalone XGBoost & Cây quyết định toàn cục~\cite{chen2016xgboost} & 25 & 165.85 & 119.40 & 5.45\% & 0.8818 \\
+Paper Baseline (Công bố)~\cite{roy2025hourly} & 24 mô hình XGBoost theo giờ & 18 & 170.84 & 120.77 & 5.38\% & 5.46\% & 0.8746 \\
+Paper Baseline (Tái hiện) & 24 mô hình XGBoost theo giờ & 18 & 171.66 & 120.77 & 5.41\% & 5.48\% & 0.8734 \\
+Feature-Enhanced & 24 mô hình XGBoost (+Fourier, CDD/HDD~\cite{quayle1980heating}) & 24 & 160.80 & 114.74 & 5.14\% & 5.22\% & 0.8889 \\
+Standalone ElasticNet & Hồi quy tuyến tính toàn cục~\cite{zou2005regularization} & 25 & 207.46 & 152.33 & 6.92\% & 6.95\% & 0.8150 \\
+Standalone XGBoost & Cây quyết định toàn cục~\cite{chen2016xgboost} & 25 & 165.85 & 119.40 & 5.45\% & 5.33\% & 0.8818 \\
 \midrule
-\textbf{Proposed CAS (Đề xuất)} & \textbf{Mô hình Stacking~\cite{wolpert1992stacked} (Meta: LightGBM~\cite{ke2017lightgbm})} & \textbf{24} & \textbf{141.81} & \textbf{106.98} & \textbf{4.75\%} & \textbf{0.9136} \\
+\textbf{Proposed CAS (Đề xuất)} & \textbf{Mô hình Stacking~\cite{wolpert1992stacked} (Meta: LightGBM~\cite{ke2017lightgbm})} & \textbf{24} & \textbf{141.81} & \textbf{106.98} & \textbf{4.75\%} & \textbf{4.71\%} & \textbf{0.9136} \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -72,7 +73,7 @@ Từ số liệu ở Bảng~\ref{tab:master_comparison}, chúng ta rút ra ba nh
 \begin{itemize}
     \item \textit{Đặc trưng bổ sung mang lại hiệu quả rõ rệt:} Khi bổ sung sóng điều hòa Fourier cùng các chỉ số nhu cầu làm mát và sưởi ấm (CDD và HDD), mô hình 24-XGBoost giảm được $10.04\text{ MW}$ sai số RMSE (tương đương giảm $5.88\%$). Điều này chứng minh việc mô hình hóa chu kỳ mùa liên tục và ngưỡng nhiệt bật điều hòa đã cung cấp thêm thông tin rất giá trị cho mô hình cây.
     \item \textit{Mô hình tuyến tính đơn lẻ bộc lộ giới hạn:} Mô hình ElasticNet toàn cục (\textit{Standalone ElasticNet}) có sai số khá lớn ($207.46\text{ MW}$), cho thấy quan hệ giữa thời tiết và phụ tải có tính phi tuyến mạnh nên một phương trình tuyến tính đơn thuần không thể bao quát toàn bộ các khung giờ. Trong khi đó, mô hình cây toàn cục (\textit{Standalone XGBoost}) đạt kết quả khả quan hơn ($165.85\text{ MW}$), vượt qua cả mô hình 24-XGBoost của bài báo gốc.
-    \item \textit{Mô hình đề xuất CAS dẫn đầu toàn diện:} Mô hình CAS đạt kết quả tốt nhất trên cả bốn thước đo với RMSE hạ xuống \textbf{141.81 MW}, MAE còn \textbf{106.98 MW}, MAPE chỉ còn \textbf{4.75\%} và hệ số $R^2$ đạt \textbf{0.9136}. So với mô hình chuẩn của bài báo gốc, CAS giúp cắt giảm tới \textbf{29.03 MW} sai số (cải thiện \textbf{17.00\%}). Trong thực tế điều độ hệ thống điện, mức giảm sai số $17\%$ này giúp tiết kiệm hàng triệu USD chi phí dự phòng công suất phát mỗi năm.
+    \item \textit{Mô hình đề xuất CAS dẫn đầu toàn diện:} Mô hình CAS đạt kết quả tốt nhất trên cả năm thước đo với RMSE hạ xuống \textbf{141.81 MW}, MAE còn \textbf{106.98 MW}, MAPE chỉ còn \textbf{4.75\%}, sMAPE chỉ còn \textbf{4.71\%} và hệ số $R^2$ đạt \textbf{0.9136}. So với mô hình chuẩn của bài báo gốc, CAS giúp cắt giảm tới \textbf{29.03 MW} sai số (cải thiện \textbf{17.00\%}). Trong thực tế vận hành lưới điện, mức giảm sai số $17.00\%$ này mang ý nghĩa kỹ thuật rất lớn, giúp các kỹ sư điều độ lập kế hoạch huy động nguồn phát sát với nhu cầu tiêu thụ thực tế hơn, hạn chế áp lực phải duy trì dư thừa các tổ máy dự phòng khẩn cấp.
 \end{itemize}
 
 Hình~\ref{fig:final_forecast} đối chiếu phụ tải thực tế (\textit{Actual Load}) và dự báo của mô hình đề xuất CAS (\textit{Predicted Load}) trên tập kiểm tra Năm~3 (năm 2022) theo hai góc nhìn:
@@ -89,7 +90,7 @@ Hình~\ref{fig:final_forecast} đối chiếu phụ tải thực tế (\textit{A
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.98\linewidth]{figures/Figure_Actual_vs_Predicted_Year3.png}
-\caption{Đối chiếu giữa phụ tải thực tế (Actual Load) và dự báo của mô hình đề xuất CAS (Predicted Load) trên tập kiểm tra Năm 3 (năm 2022): (a) Đánh giá xu hướng tổng thể và tính ổn định dài hạn qua 8.760 giờ cả năm; (b) Phóng to chi tiết 2 tuần cao điểm sóng nhiệt mùa hè (01/09/2022 -- 14/09/2022) đóng vai trò kiểm tra áp lực cực hạn và kiểm chứng khả năng bám sát chu kỳ ngày/đêm.}
+\caption{Đối chiếu giữa phụ tải thực tế và kết quả dự báo của mô hình CAS trên tập kiểm tra Năm 3.}
 \label{fig:final_forecast}
 \end{figure}
 
@@ -140,7 +141,7 @@ Hệ số tương quan $0.6131$ (Hình~\ref{fig:residual_corr}) là mức tươn
 \label{fig:residual_corr}
 \end{figure}
 
-Để làm rõ hơn nhận định này, chúng tôi chia tập kiểm tra thành các điều kiện vận hành thực tế như giờ đêm, sóng nhiệt, giờ cao điểm, ngày thường và cuối tuần. Sai số của từng mô hình được tổng hợp trong Bảng~\ref{tab:regime_errors} và minh họa trực quan ở Hình~\ref{fig:regime_errors}.
+Để làm rõ hơn nhận định này, chúng tôi chia tập kiểm tra thành các điều kiện vận hành thực tế như giờ đêm, sóng nhiệt, giờ cao điểm, ngày thường và cuối tuần. Sai số RMSE của từng mô hình được tổng hợp chi tiết trong Bảng~\ref{tab:regime_errors}.
 
 \begin{table}[H]
 \centering
@@ -165,19 +166,21 @@ Ngày cuối tuần và ngày nghỉ lễ & 2.760 & 215.04 & 176.16 & XGBoost & 
 \end{tabularx}
 \end{table}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.92\linewidth]{figures/Figure_8_Conditional_Regime_Errors.png}
-\caption{So sánh sai số RMSE giữa ElasticNet, XGBoost và mô hình kết hợp CAS theo từng điều kiện cụ thể.}
-\label{fig:regime_errors}
-\end{figure}
-
-Số liệu từ Bảng~\ref{tab:regime_errors} đã chỉ ra hai phát hiện rất thú vị:
+Số liệu từ Bảng~\ref{tab:regime_errors} chỉ ra ba phát hiện thực nghiệm cốt lõi:
 \begin{itemize}
     \item \textbf{Vào ban đêm (00:00 - 06:00):} Mô hình tuyến tính ElasticNet hoạt động tốt hơn hẳn XGBoost ($131.33\text{ MW}$ so với $141.37\text{ MW}$). Lý do là vào ban đêm, phụ tải duy trì ở mức sàn ổn định và biến thiên tương đối phẳng. Mô hình cây với cơ chế phân chia ngưỡng bậc thang dễ tạo ra các đường xấp xỉ răng cưa và bị nhiễu; trong khi đó, hàm tuyến tính trơn tru của ElasticNet lại khớp hoàn hảo với trạng thái này.
     \item \textbf{Khi có sóng nhiệt (CDD $> 3^\circ$C):} Tình thế đảo ngược hoàn toàn. Khi nhiệt độ tăng cao, điều hòa nhiệt độ bật đồng loạt khiến phụ tải vọt lên phi tuyến. ElasticNet bị hụt hơi với sai số vọt lên $313.27\text{ MW}$, trong khi XGBoost xử lý tốt các ngưỡng phi tuyến này với RMSE chỉ $244.16\text{ MW}$ (vượt trội hơn tới $69.11\text{ MW}$).
     \item \textbf{Vai trò điều phối của mô hình tổng hợp (Meta-Learner):} Ở bất kỳ tình huống nào, mô hình kết hợp CAS cũng cho ra kết quả tốt hơn mô hình thành phần tốt nhất. Chẳng hạn vào ban đêm, CAS đạt RMSE $100.50\text{ MW}$ (tốt hơn ElasticNet tới $30.83\text{ MW}$), và khi có sóng nhiệt, CAS tiếp tục giảm thêm $28.72\text{ MW}$ so với XGBoost.
 \end{itemize}
+
+Sự phân tầng ưu thế vượt trội giữa các mô hình theo từng điều kiện vận hành được minh họa trực quan trong Hình~\ref{fig:regime_errors}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\linewidth]{figures/Figure_8_Conditional_Regime_Errors.png}
+\caption{So sánh sai số RMSE giữa ElasticNet, XGBoost và mô hình kết hợp CAS theo từng điều kiện vận hành.}
+\label{fig:regime_errors}
+\end{figure}
 
 \subsubsection{Phân tích mức độ ảnh hưởng của các biến qua SHAP}
 
@@ -192,8 +195,8 @@ Số liệu từ Bảng~\ref{tab:regime_errors} đã chỉ ra hai phát hiện r
 
 Kết quả giải thích SHAP hoàn toàn trùng khớp với trực giác thực tế:
 \begin{itemize}
-    \item Vào khung giờ trưa và chiều (12:00 - 18:00), các yếu tố liên quan đến nhiệt độ và nắng như chỉ số nhu cầu làm mát (CDD), bức xạ mặt trời (GHI) và thành phần nhiệt độ chính (PCA\_Temp\_1) có giá trị SHAP cao nhất, quyết định phần lớn mức tiêu thụ điện.
-    \item Vào khung giờ đêm (00:00 - 06:00), ảnh hưởng của nhiệt độ giảm xuống rất thấp. Lúc này, mô hình phụ thuộc chủ yếu vào mức phụ tải trễ của giờ trước (Lag 1) và chu kỳ mùa Fourier. Mô hình tổng hợp (Meta-Learner) nắm bắt được điều này và tự động ưu tiên kết quả từ mô hình tuyến tính ElasticNet.
+    \item Vào khung giờ trưa và chiều (12:00 -- 18:00), các yếu tố phản ánh áp lực nhiệt và bức xạ tức thời như chỉ số nhu cầu làm mát (\texttt{CDD}), bức xạ mặt trời (\texttt{PCA\_GHI}), nhiệt độ hiện tại (\texttt{PCA\_Temp}) và nhiệt độ trễ của giờ trước (\texttt{PCA\_Temp\_Lag1}) có giá trị |SHAP| cao nhất, quyết định phần lớn mức tiêu thụ điện do hệ thống điều hòa làm mát vận hành hết công suất.
+    \item Vào khung giờ đêm (00:00 -- 06:00), ảnh hưởng của bức xạ mặt trời và nhu cầu làm mát giảm xuống mức tối thiểu. Lúc này, mô hình phụ thuộc chủ yếu vào chu kỳ mùa Fourier (\texttt{Sin\_Year}, \texttt{Cos\_Year}), biến phân loại ngày trong tuần (\texttt{Is\_Weekend}) và biến quán tính nhiệt độ trễ của giờ trước (\texttt{PCA\_Temp\_Lag1}). Nhờ phụ tải nền ban đêm có tính ổn định và ít biến động phi tuyến, mô hình tổng hợp (Meta-Learner) đã tự động ưu tiên trọng số cho mô hình tuyến tính ElasticNet.
 \end{itemize}
 
 % =========================================================================
@@ -222,24 +225,8 @@ Khi xem xét kỹ các mốc thời gian có sai số lớn nhất ($|y - \hat{y
     \item \textit{Các đợt nắng nóng bất thường đầu mùa (tháng 5):} Tháng 5 ghi nhận 34 giờ có sai số lệch trên $350\text{ MW}$, tập trung vào đợt nắng sớm từ ngày 12 đến 14/05/2022. Vào khung giờ trưa và đầu chiều (12:00 -- 15:00), mô hình bị dự báo thừa từ $+350$ đến $+455\text{ MW}$ (ví dụ ngày 12/05 lúc 14:00: thực tế $1.383\text{ MW}$, dự báo $1.810\text{ MW}$, chênh $+427\text{ MW}$; ngày 13/05 lúc 15:00: thực tế $1.845\text{ MW}$, dự báo $2.300\text{ MW}$, chênh $+455\text{ MW}$). Nguyên nhân là trong đợt nóng đầu tiên của năm, người dân chưa có phản xạ bật điều hòa đồng loạt mà ưu tiên mở cửa hoặc bật quạt, tạo ra độ trễ thích nghi so với giữa mùa hè.
 \end{itemize}
 
-\subsubsection{Đánh giá hiệu quả kinh tế và ứng dụng thực tiễn}
-Trong quản lý vận hành hệ thống điện thực tế, các đơn vị điều độ (như CAISO tại California) bắt buộc phải duy trì một lượng công suất nguồn phát dự phòng quay (\textit{spinning reserve}) tương ứng với độ bất định dự báo để đối phó với sự thay đổi đột ngột của phụ tải. Mức giảm \textbf{29.03~MW} sai số RMSE từ mô hình CAS tương đương với việc cho phép hệ thống giảm bớt khoảng 29~MW công suất phát điện dự phòng chạy dầu/khí đắt đỏ mỗi giờ. Với chi phí biên dự phòng quay bình quân từ 20 đến 30 USD/MWh trên thị trường điện California, mức cải thiện này mang lại giá trị tiết kiệm kinh tế trực tiếp từ:
-\begin{equation}
-29.03\text{ MW} \times 8.760\text{ giờ/năm} \times 20\text{--}30\text{ USD/MWh} \approx \mathbf{5.09 \text{ đến } 7.63 \text{ triệu USD mỗi năm}}.
-\end{equation}
-Đây là lợi ích kinh tế trực tiếp và to lớn, đồng thời giúp giảm thiểu lượng khí phát thải $CO_2$ do không phải vận hành non tải các tổ máy nhiệt điện.
-
-\paragraph{Định lượng độ bất định với khoảng tin cậy Conformal Prediction:}
-Bên cạnh dự báo điểm (\textit{point forecast}), an toàn vận hành lưới điện đòi hỏi các kỹ sư điều độ phải nắm bắt được độ bất định biên. Chúng tôi áp dụng phương pháp \textit{Conformal Prediction}~\cite{vovk2005algorithmic} trên phần dư của mô hình CAS để xây dựng khoảng tin cậy với mức độ bao phủ danh định $90\%$ không phụ thuộc giả định phân phối tham số (Hình~\ref{fig:conformal_prediction}).
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.96\linewidth]{figures/fig_cp_intervals.png}
-\caption{Dự báo khoảng tin cậy $90\%$ bằng phương pháp Conformal Prediction trong 7 ngày đầu tiên của tập kiểm tra Năm 3 (168 giờ). Dải tô bóng màu vàng bao bọc trọn vẹn phụ tải thực tế (đường màu đen), cung cấp biên độ an toàn vận hành thống kê có kiểm chứng cho đơn vị điều độ.}
-\label{fig:conformal_prediction}
-\end{figure}
-
-Hình~\ref{fig:conformal_prediction} minh họa kết quả dự báo khoảng tin cậy $90\%$ trong 168 giờ đầu tiên của tập kiểm tra Năm 3. Kết quả thực nghiệm xác nhận tỷ lệ bao phủ thực tế đạt $91.67\%$ (vượt mức cam kết lý thuyết $90\%$), trong khi bề rộng khoảng tin cậy dao động thích ứng theo độ biến động của từng khung giờ: hẹp và chặt chẽ vào ban đêm ($1.600$--$2.100\text{ MW}$), và tự động mở rộng biên an toàn tại các đỉnh tải ban ngày ($2.400$--$2.900\text{ MW}$). Công cụ này trực tiếp giúp đơn vị vận hành ấn định chính xác dung lượng dự phòng quay cần mua theo thời gian thực mà không gây lãng phí nguồn lực.
+\subsubsection{Ý nghĩa vận hành thực tiễn}
+Trong quản lý vận hành hệ thống điện, các đơn vị vận hành lưới (như CAISO tại bang California) bắt buộc phải duy trì một lượng nguồn điện phát dự phòng (\textit{operating reserve}) sẵn sàng cấp điện để bù đắp các biến động bất ngờ giữa phụ tải thực tế và kế hoạch điều độ. Mức giảm \textbf{29.03~MW} sai số RMSE từ mô hình đề xuất CAS (cải thiện $17.00\%$) mang lại ý nghĩa kỹ thuật rất thiết thực: giúp các kỹ sư vận hành dự báo sát hơn nhu cầu tiêu thụ thực tế, giảm thiểu áp lực phải huy động dư thừa công suất dự phòng từ các tổ máy nhiệt điện chạy dầu/khí đắt đỏ, đồng thời chủ động phân bổ nguồn lực an toàn trong các đợt cao điểm nắng nóng mùa hè.
 
 % =========================================================================
 \subsection{Hạn chế của nghiên cứu}

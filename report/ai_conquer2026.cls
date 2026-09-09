@@ -41,6 +41,7 @@
 \RequirePackage{titling}
 \RequirePackage{tabularx}
 \RequirePackage{makecell}
+\RequirePackage{multirow}
 \RequirePackage{xurl}
 \RequirePackage{framed}
 \RequirePackage{fancyhdr}
@@ -62,7 +63,7 @@
 \setlength{\cftaftertoctitleskip}{2em}
 \setlength{\cftbeforesubsecskip}{7pt}
 \renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
-\setlength{\cftsecnumwidth}{3em}
+\setlength{\cftsecnumwidth}{3.5em}
 \renewcommand{\cftsecaftersnum}{\quad}
 \setlength{\cftsubsecnumwidth}{4em}
 \renewcommand{\cftsubsecaftersnum}{\quad}
